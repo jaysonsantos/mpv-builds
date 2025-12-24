@@ -26,4 +26,11 @@ else
   echo "Patch already applied or cannot be applied"
 fi
 
+for i in meson.build meson.options
+do
+    echo "Patched $i"
+    cat $i ||true
+    echo -e "\n\n\n"
+done
+
 cd ../..
