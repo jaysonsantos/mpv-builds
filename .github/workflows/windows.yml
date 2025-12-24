@@ -5,6 +5,7 @@ on:
     branches: [main, master]
     paths:
       - '.github/workflows/windows.yml'
+      - '.github/workflows/build-common.yml'
       - 'scripts/windows/**'
       - 'scripts/common/**'
       - 'patches/windows/**'
@@ -13,6 +14,7 @@ on:
     branches: [main, master]
     paths:
       - '.github/workflows/windows.yml'
+      - '.github/workflows/build-common.yml'
       - 'scripts/windows/**'
       - 'scripts/common/**'
       - 'patches/windows/**'
@@ -20,126 +22,19 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
-    name: Build ${{ matrix.config.name }}
-    runs-on: windows-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-          - name: Windows x86_64
-            arch: x86_64
-            artifact_name: windows-x86_64
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Cache MPV Source
-        id: cache-mpv
-        uses: actions/cache@v4
-        with:
-          path: |
-            .cache/mpv-v0.41.0.tar.gz
-            .cache/mpv
-            !.cache/mpv/build
-            !.cache/mpv/subprojects/*/build*
-            !.cache/mpv/subprojects/*/.git
-          key: mpv-source-v0.41.0-${{ hashFiles('.cache/mpv/meson.build') }}
-          restore-keys: |
-            mpv-source-v0.41.0-
-
-      - name: Cache sccache
-        uses: actions/cache@v4
-        with:
-          path: ~\AppData\Local\Mozilla\sccache
-          key: sccache-windows-${{ matrix.config.arch }}-${{ github.sha }}
-          restore-keys: |
-            sccache-windows-${{ matrix.config.arch }}-
-            sccache-windows-
-
-      - name: Setup sccache
-        uses: mozilla-actions/sccache-action@v0.0.6
-
-      - name: Install Dependencies
-        run: |
-          choco install -y ninja nasm pkgconfiglite
-          pip install meson
-
-      - name: Configure sccache environment
-        shell: bash
-        run: |
-          echo "CC=sccache clang-cl" >> $GITHUB_ENV
-          echo "CXX=sccache clang-cl" >> $GITHUB_ENV
-          echo "SCCACHE_DIR=${{ github.workspace }}/.sccache" >> $GITHUB_ENV
-
-      - name: Download MPV Source
-        if: steps.cache-mpv.outputs.cache-hit != 'true'
-        shell: bash
-        run: ./scripts/common/download-mpv.sh
-
-      - name: Setup Wraps
-        if: steps.cache-mpv.outputs.cache-hit != 'true'
-        shell: bash
-        run: ./scripts/common/setup-wraps.sh
-
-      - name: Clean Build Directories
-        shell: bash
-        run: |
-          rm -rf .cache/mpv/build
-          rm -rf .cache/prefix/
-          echo "Cleaned all build directories"
-
-      - name: Configure Build
-        shell: pwsh
-        run: .\scripts\windows\configure-windows.ps1 -Arch ${{ matrix.config.arch }}
-
-      - name: Build
-        shell: bash
-        run: |
-          cd .cache/mpv/build/windows/${{ matrix.config.arch }}
-          ninja install
-
-      - name: Collect All Libraries
-        shell: bash
-        run: |
-          ARCH="${{ matrix.config.arch }}"
-          OUTPUT_DIR="collected-libs/windows-${ARCH}"
-          mkdir -p "${OUTPUT_DIR}"
-
-          EXTENSIONS=("dll" "lib" "a")
-
-          for ext in "${EXTENSIONS[@]}"; do
-            find .cache/prefix/windows/${ARCH} -name "*.${ext}" -exec cp {} "${OUTPUT_DIR}/" \; 2>/dev/null || true
-          done
-
-          BUILD_DIR=".cache/mpv/build/windows/${ARCH}"
-          for ext in "${EXTENSIONS[@]}"; do
-            find "${BUILD_DIR}" -name "*.${ext}" -exec cp {} "${OUTPUT_DIR}/" \; 2>/dev/null || true
-          done
-
-          echo "Collected libraries:"
-          ls -lh "${OUTPUT_DIR}/"
-
-      - name: Upload Artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.config.artifact_name }}
-          path: collected-libs/windows-${{ matrix.config.arch }}/
-          if-no-files-found: error
-
-      - name: sccache stats
-        shell: bash
-        run: sccache --show-stats
+  build-x86_64:
+    uses: ./.github/workflows/build-common.yml
+    with:
+      platform: windows
+      arch: x86_64
+      runner_os: windows-latest
+      library_type: shared
+      artifact_name: windows-x86_64
+      build_name: Windows x86_64
 
   create-release:
     name: Create Release
-    needs: build
+    needs: build-x86_64
     runs-on: ubuntu-latest
     if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
 
