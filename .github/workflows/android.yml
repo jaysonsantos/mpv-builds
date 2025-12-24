@@ -1,0 +1,224 @@
+name: Build Android
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - '.github/workflows/android.yml'
+      - 'scripts/android/**'
+      - 'scripts/common/**'
+      - 'patches/android/**'
+      - 'wraps/**'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - '.github/workflows/android.yml'
+      - 'scripts/android/**'
+      - 'scripts/common/**'
+      - 'patches/android/**'
+      - 'wraps/**'
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build ${{ matrix.config.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        config:
+          - name: Android x86_64
+            arch: x86_64
+            artifact_name: android-x86_64
+
+          - name: Android aarch64
+            arch: aarch64
+            artifact_name: android-aarch64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Cache MPV Source
+        id: cache-mpv
+        uses: actions/cache@v4
+        with:
+          path: |
+            .cache/mpv-v0.41.0.tar.gz
+            .cache/mpv
+            !.cache/mpv/build
+            !.cache/mpv/subprojects/*/build*
+            !.cache/mpv/subprojects/*/.git
+          key: mpv-source-v0.41.0-${{ hashFiles('.cache/mpv/meson.build') }}
+          restore-keys: |
+            mpv-source-v0.41.0-
+
+      - name: Cache sccache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/sccache
+          key: sccache-android-${{ matrix.config.arch }}-${{ github.sha }}
+          restore-keys: |
+            sccache-android-${{ matrix.config.arch }}-
+            sccache-android-
+
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.6
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ninja-build \
+            pkg-config \
+            nasm \
+            python3-pip \
+            curl \
+            jq
+          pip3 install meson
+
+      - name: Setup Android NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: r27
+          add-to-path: true
+
+      - name: Export Android NDK Environment
+        shell: bash
+        run: |
+          NDK_HOME="${{ steps.setup-ndk.outputs.ndk-path }}"
+          echo "ANDROID_NDK_HOME=$NDK_HOME" >> $GITHUB_ENV
+          echo "$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_PATH
+
+      - name: Configure sccache environment
+        shell: bash
+        run: |
+          echo "CC=sccache gcc" >> $GITHUB_ENV
+          echo "CXX=sccache g++" >> $GITHUB_ENV
+          echo "SCCACHE_DIR=${{ github.workspace }}/.sccache" >> $GITHUB_ENV
+
+      - name: Download MPV Source
+        if: steps.cache-mpv.outputs.cache-hit != 'true'
+        shell: bash
+        run: ./scripts/common/download-mpv.sh
+
+      - name: Setup Wraps
+        if: steps.cache-mpv.outputs.cache-hit != 'true'
+        shell: bash
+        run: ./scripts/common/setup-wraps.sh
+
+      - name: Clean Build Directories
+        shell: bash
+        run: |
+          rm -rf .cache/mpv/build
+          rm -rf .cache/prefix/
+          echo "Cleaned all build directories"
+
+      - name: Create Android Cross File
+        shell: bash
+        run: ./scripts/android/create-android-cross.sh ${{ matrix.config.arch }}
+
+      - name: Configure Build
+        shell: bash
+        run: ./scripts/android/configure-android.sh ${{ matrix.config.arch }}
+
+      - name: Build
+        shell: bash
+        run: |
+          cd .cache/mpv/build/android/${{ matrix.config.arch }}
+          ninja install
+
+      - name: Copy Android Libraries
+        shell: bash
+        run: |
+          cd .cache/mpv/build/android/${{ matrix.config.arch }}
+          NDK_BIN=$(dirname $(jq -r '.host.cpp.exelist[0]' meson-info/intro-compilers.json))
+
+          if echo "$NDK_BIN" | grep -q "aarch64"; then
+            ARCH_DIR="aarch64-linux-android"
+          elif echo "$NDK_BIN" | grep -q "x86_64"; then
+            ARCH_DIR="x86_64-linux-android"
+          fi
+
+          mkdir -p ../../../prefix/android/${{ matrix.config.arch }}/lib
+          cp "$NDK_BIN/../sysroot/usr/lib/$ARCH_DIR/libc++_shared.so" ../../../prefix/android/${{ matrix.config.arch }}/lib/ || true
+
+      - name: Collect All Libraries
+        shell: bash
+        run: |
+          ARCH="${{ matrix.config.arch }}"
+          OUTPUT_DIR="collected-libs/android-${ARCH}"
+          mkdir -p "${OUTPUT_DIR}"
+
+          EXTENSIONS=("so" "a")
+
+          for ext in "${EXTENSIONS[@]}"; do
+            find .cache/prefix/android/${ARCH} -name "*.${ext}" -exec cp {} "${OUTPUT_DIR}/" \; 2>/dev/null || true
+          done
+
+          BUILD_DIR=".cache/mpv/build/android/${ARCH}"
+          for ext in "${EXTENSIONS[@]}"; do
+            find "${BUILD_DIR}" -name "*.${ext}" -exec cp {} "${OUTPUT_DIR}/" \; 2>/dev/null || true
+          done
+
+          echo "Collected libraries:"
+          ls -lh "${OUTPUT_DIR}/"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.config.artifact_name }}
+          path: collected-libs/android-${{ matrix.config.arch }}/
+          if-no-files-found: error
+
+      - name: sccache stats
+        shell: bash
+        run: sccache --show-stats
+
+  create-release:
+    name: Create Release
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Archive for Each Platform
+        run: |
+          cd artifacts
+          for dir in */; do
+            dirname=${dir%/}
+            tar -czf ${dirname}.tar.gz -C ${dirname} .
+          done
+          ls -lh *.tar.gz
+
+      - name: Generate Release Tag
+        id: tag
+        run: |
+          TAG="android-build-$(date +%Y%m%d-%H%M%S)"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: Android Build ${{ steps.tag.outputs.tag }}
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
