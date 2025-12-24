@@ -134,8 +134,8 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          echo "CC=sccache clang-cl" >> $GITHUB_ENV
-          echo "CXX=sccache clang-cl" >> $GITHUB_ENV
+          echo "CC=sccache clang" >> $GITHUB_ENV
+          echo "CXX=sccache clang++" >> $GITHUB_ENV
 
       - name: Download MPV Source
         if: steps.cache-mpv.outputs.cache-hit != 'true'
