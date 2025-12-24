@@ -176,19 +176,14 @@ jobs:
         run: .\scripts\configure-windows.ps1 -Arch ${{ matrix.config.arch }}
 
       - name: Apply macOS/iOS Patch
-        if: matrix.config.platform == 'macos'
+        if: matrix.config.platform == 'macos' || matrix.config.platform == 'ios'
         shell: bash
-        run: ./scripts/apply-macos-patch.sh macos
+        run: ./scripts/apply-macos-patch.sh ${{ matrix.config.platform }}
 
       - name: Configure Build (macOS)
         if: matrix.config.platform == 'macos'
         shell: bash
         run: ./scripts/configure-macos.sh ${{ matrix.config.arch }}
-
-      - name: Apply macOS/iOS Patch
-        if: matrix.config.platform == 'ios'
-        shell: bash
-        run: ./scripts/apply-macos-patch.sh ios
 
       - name: Create iOS Cross File
         if: matrix.config.platform == 'ios'
