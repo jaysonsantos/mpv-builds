@@ -19,7 +19,7 @@ on:
       - 'scripts/macos/**'
       - 'scripts/ios/**'
       - 'scripts/common/**'
-      - 'patches/macos/**'
+      - 'patches/macios/**'
       - 'wraps/**'
   workflow_dispatch:
 

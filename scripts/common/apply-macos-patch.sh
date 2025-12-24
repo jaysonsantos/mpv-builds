@@ -8,7 +8,7 @@ if [ "$PLATFORM" != "macos" ] && [ "$PLATFORM" != "ios" ]; then
   exit 1
 fi
 
-PATCH_FILE="patches/macios.patch"
+PATCH_FILE="patches/macios/macios.patch"
 
 if [ ! -f "$PATCH_FILE" ]; then
   echo "Warning: Patch file not found: $PATCH_FILE"
