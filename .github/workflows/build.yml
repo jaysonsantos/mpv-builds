@@ -114,10 +114,19 @@ jobs:
 
       - name: Setup Android NDK
         if: matrix.config.platform == 'android'
+        id: setup-ndk
         uses: nttld/setup-ndk@v1
         with:
           ndk-version: r27
           add-to-path: true
+
+      - name: Export Android NDK Environment
+        if: matrix.config.platform == 'android'
+        shell: bash
+        run: |
+          NDK_HOME="${{ steps.setup-ndk.outputs.ndk-path }}"
+          echo "ANDROID_NDK_HOME=$NDK_HOME" >> $GITHUB_ENV
+          echo "$NDK_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin" >> $GITHUB_PATH
 
       - name: Configure sccache environment
         shell: bash
@@ -130,53 +139,18 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          echo "CC=sccache cl" >> $GITHUB_ENV
-          echo "CXX=sccache cl" >> $GITHUB_ENV
+          echo "CC=sccache clang-cl" >> $GITHUB_ENV
+          echo "CXX=sccache clang-cl" >> $GITHUB_ENV
 
       - name: Download MPV Source
         if: steps.cache-mpv.outputs.cache-hit != 'true'
         shell: bash
-        run: |
-          MPV_VERSION=v0.41.0
-          MPV_LINK=https://github.com/mpv-player/mpv/archive/refs/tags/${MPV_VERSION}.tar.gz
-          mkdir -p .cache/
-          curl -Lsqo .cache/mpv-${MPV_VERSION}.tar.gz ${MPV_LINK}
-          MPV_DIR=$(tar -tf .cache/mpv-${MPV_VERSION}.tar.gz | head -n 1)
-          tar -xf .cache/mpv-${MPV_VERSION}.tar.gz -C .cache/
-          mv .cache/${MPV_DIR} .cache/mpv
+        run: ./scripts/download-mpv.sh
 
       - name: Setup Wraps
         if: steps.cache-mpv.outputs.cache-hit != 'true'
         shell: bash
-        run: |
-          mkdir -p .cache/mpv/subprojects
-          cd .cache/mpv
-
-          # Install basic wraps
-          for wrap in expat harfbuzz libpng zlib mbedtls; do
-            meson wrap install $wrap || true
-          done
-
-          # Download Gstreamer wraps
-          GSTREAMER_WRAP_URL=https://gitlab.freedesktop.org/gstreamer/gstreamer/-/raw/main/subprojects
-          for wrap in freetype2 fribidi fontconfig libjpeg-turbo; do
-            curl -Lsqo subprojects/${wrap}.wrap ${GSTREAMER_WRAP_URL}/${wrap}.wrap || true
-          done
-
-      - name: Copy Local Wraps
-        shell: bash
-        run: |
-          if [ -d "../JellyfinPlayer/wraps" ]; then
-            cp ../JellyfinPlayer/wraps/*.wrap .cache/mpv/subprojects/ || true
-          fi
-
-      - name: Apply FFmpeg Patches
-        shell: bash
-        run: |
-          if [ -f "../JellyfinPlayer/patches/ffmpeg-jni-fix.patch" ] && [ "${{ matrix.config.platform }}" == "android" ]; then
-            cd .cache/mpv/subprojects/FFmpeg
-            patch -p1 < ../../../../JellyfinPlayer/patches/ffmpeg-jni-fix.patch || true
-          fi
+        run: ./scripts/setup-wraps.sh
 
       - name: Clean Build Directories
         shell: bash
@@ -186,131 +160,45 @@ jobs:
           rm -rf .cache/prefix/
           echo "Cleaned all build directories"
 
-      - name: Generate Android Cross File
+      - name: Create Android Cross File
         if: matrix.config.platform == 'android'
         shell: bash
-        run: |
-          cd .cache/mpv
-          meson env2mfile --android -o androidcross
-          CROSS_FILE="androidcross/android-27.0.12077973-android21-${{ matrix.config.arch }}-cross.txt"
-
-          # Write NDK root
-          if [ -f "$CROSS_FILE" ]; then
-            NDK_ROOT=$(dirname $(grep -oE '/.+?clang' $CROSS_FILE | head -n 1 | sed 's|/toolchains/.*||'))
-            echo "ndk_root = '$ANDROID_NDK_HOME'" >> $CROSS_FILE
-          fi
+        run: ./scripts/create-android-cross.sh ${{ matrix.config.arch }}
 
       - name: Configure Build (Android)
         if: matrix.config.platform == 'android'
         shell: bash
-        run: |
-          cd .cache/mpv
-          ARCH="${{ matrix.config.arch }}"
-          CROSS_FILE="../../androidcross/android-27.0.12077973-android21-${ARCH}-cross.txt"
-
-          ASM_FLAGS=""
-          if [ "$ARCH" == "x86_64" ]; then
-            ASM_FLAGS="-Dlibass:asm=disabled -DFFmpeg:x86asm=disabled"
-          fi
-
-          meson setup build/android/${ARCH} \
-            --default-library=shared \
-            --buildtype=release \
-            -Dwrap_mode=forcefallback \
-            -Dlibmpv=true \
-            -Dgpl=true \
-            -Dshaderc=disabled \
-            -Dharfbuzz:icu=disabled \
-            -Dlibass:require-system-font-provider=false \
-            ${ASM_FLAGS} \
-            -DFFmpeg:gpl=enabled \
-            -DFFmpeg:version3=enabled \
-            -DFFmpeg:mbedtls=enabled \
-            -DFFmpeg:tls_protocol=enabled \
-            -DFFmpeg:jni=enabled \
-            -DFFmpeg:pthreads=enabled \
-            --cross-file ${CROSS_FILE} \
-            --prefix=$(pwd)/../prefix/android/${ARCH}
+        run: ./scripts/configure-android.sh ${{ matrix.config.arch }}
 
       - name: Configure Build (Windows)
         if: matrix.config.platform == 'windows'
         shell: bash
-        run: |
-          cd .cache/mpv
-          meson setup build/windows/x86_64 \
-            --default-library=shared \
-            --buildtype=release \
-            -Dwrap_mode=forcefallback \
-            -Dlibmpv=true \
-            -Dgpl=true \
-            -Dshaderc=disabled \
-            -Dharfbuzz:icu=disabled \
-            -Dlibass:require-system-font-provider=false \
-            -DFFmpeg:gpl=enabled \
-            -DFFmpeg:version3=enabled \
-            -DFFmpeg:mbedtls=enabled \
-            -DFFmpeg:tls_protocol=enabled \
-            --prefix=$(pwd)/../prefix/windows/x86_64
+        run: ./scripts/configure-windows.sh ${{ matrix.config.arch }}
+
+      - name: Apply macOS/iOS Patch
+        if: matrix.config.platform == 'macos'
+        shell: bash
+        run: ./scripts/apply-macos-patch.sh macos
 
       - name: Configure Build (macOS)
         if: matrix.config.platform == 'macos'
         shell: bash
-        run: |
-          cd .cache/mpv
-          meson setup build/macos/aarch64 \
-            --default-library=shared \
-            --buildtype=release \
-            -Dwrap_mode=forcefallback \
-            -Dlibmpv=true \
-            -Dgpl=true \
-            -Dshaderc=disabled \
-            -Dharfbuzz:icu=disabled \
-            -Dlibass:require-system-font-provider=false \
-            -DFFmpeg:gpl=enabled \
-            -DFFmpeg:version3=enabled \
-            -DFFmpeg:mbedtls=enabled \
-            -DFFmpeg:tls_protocol=enabled \
-            --prefix=$(pwd)/../prefix/macos/aarch64
+        run: ./scripts/configure-macos.sh ${{ matrix.config.arch }}
+
+      - name: Apply macOS/iOS Patch
+        if: matrix.config.platform == 'ios'
+        shell: bash
+        run: ./scripts/apply-macos-patch.sh ios
+
+      - name: Create iOS Cross File
+        if: matrix.config.platform == 'ios'
+        shell: bash
+        run: ./scripts/create-ios-cross.sh
 
       - name: Configure Build (iOS)
         if: matrix.config.platform == 'ios'
         shell: bash
-        run: |
-          cd .cache/mpv
-
-          # Create iOS cross file
-          cat > ios-cross.txt << 'EOF'
-          [binaries]
-          c = ['xcrun', '-sdk', 'iphoneos', 'clang']
-          cpp = ['xcrun', '-sdk', 'iphoneos', 'clang++']
-          ar = ['xcrun', '-sdk', 'iphoneos', 'ar']
-          strip = ['xcrun', '-sdk', 'iphoneos', 'strip']
-
-          [properties]
-          sys_root = '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk'
-
-          [host_machine]
-          system = 'darwin'
-          cpu_family = 'aarch64'
-          cpu = 'arm64'
-          endian = 'little'
-          EOF
-
-          meson setup build/ios/aarch64 \
-            --default-library=static \
-            --buildtype=release \
-            -Dwrap_mode=forcefallback \
-            -Dlibmpv=true \
-            -Dgpl=true \
-            -Dshaderc=disabled \
-            -Dharfbuzz:icu=disabled \
-            -Dlibass:require-system-font-provider=false \
-            -DFFmpeg:gpl=enabled \
-            -DFFmpeg:version3=enabled \
-            -DFFmpeg:mbedtls=enabled \
-            -DFFmpeg:tls_protocol=enabled \
-            --cross-file ios-cross.txt \
-            --prefix=$(pwd)/../prefix/ios/aarch64
+        run: ./scripts/configure-ios.sh ${{ matrix.config.arch }}
 
       - name: Build
         shell: bash
