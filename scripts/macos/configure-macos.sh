@@ -13,7 +13,7 @@ meson setup "build/macos/${ARCH}" \
   -Dtests=false \
   -Dgpl=true \
   -Dmoltenvk=enabled \
-  -Dshaderc=enabled \
+  -Dshaderc=disabled \
   -Dharfbuzz:icu=disabled \
   -Dlibass:require-system-font-provider=false \
   -DFFmpeg:gpl=enabled \
