@@ -1,0 +1,75 @@
+name: Build Windows
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - '.github/workflows/windows.yml'
+      - '.github/workflows/build-common.yml'
+      - 'scripts/windows/**'
+      - 'scripts/common/**'
+      - 'patches/windows/**'
+      - 'wraps/**'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - '.github/workflows/windows.yml'
+      - '.github/workflows/build-common.yml'
+      - 'scripts/windows/**'
+      - 'scripts/common/**'
+      - 'patches/windows/**'
+      - 'wraps/**'
+  workflow_dispatch:
+
+jobs:
+  build-x86_64:
+    uses: ./.github/workflows/build-common.yml
+    with:
+      platform: windows
+      arch: x86_64
+      runner_os: windows-latest
+      library_type: shared
+      artifact_name: windows-x86_64
+      build_name: Windows x86_64
+
+  create-release:
+    name: Create Release
+    needs: build-x86_64
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Archive for Each Platform
+        run: |
+          cd artifacts
+          for dir in */; do
+            dirname=${dir%/}
+            tar -czf ${dirname}.tar.gz -C ${dirname} .
+          done
+          ls -lh *.tar.gz
+
+      - name: Generate Release Tag
+        id: tag
+        run: |
+          TAG="windows-build-$(date +%Y%m%d-%H%M%S)"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: Windows Build ${{ steps.tag.outputs.tag }}
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

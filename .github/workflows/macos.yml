@@ -1,0 +1,87 @@
+name: Build macOS & iOS
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - '.github/workflows/macos.yml'
+      - '.github/workflows/build-common.yml'
+      - 'scripts/macos/**'
+      - 'scripts/ios/**'
+      - 'scripts/common/**'
+      - 'patches/macos/**'
+      - 'wraps/**'
+  pull_request:
+    branches: [main, master]
+    paths:
+      - '.github/workflows/macos.yml'
+      - '.github/workflows/build-common.yml'
+      - 'scripts/macos/**'
+      - 'scripts/ios/**'
+      - 'scripts/common/**'
+      - 'patches/macos/**'
+      - 'wraps/**'
+  workflow_dispatch:
+
+jobs:
+  build-macos:
+    uses: ./.github/workflows/build-common.yml
+    with:
+      platform: macos
+      arch: aarch64
+      runner_os: macos-14
+      library_type: shared
+      artifact_name: macos-aarch64
+      build_name: macOS aarch64
+
+  build-ios:
+    uses: ./.github/workflows/build-common.yml
+    with:
+      platform: ios
+      arch: aarch64
+      runner_os: macos-14
+      library_type: static
+      artifact_name: ios-aarch64
+      build_name: iOS aarch64
+
+  create-release:
+    name: Create Release
+    needs: [build-macos, build-ios]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download All Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Create Archive for Each Platform
+        run: |
+          cd artifacts
+          for dir in */; do
+            dirname=${dir%/}
+            tar -czf ${dirname}.tar.gz -C ${dirname} .
+          done
+          ls -lh *.tar.gz
+
+      - name: Generate Release Tag
+        id: tag
+        run: |
+          TAG="macos-ios-build-$(date +%Y%m%d-%H%M%S)"
+          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.tag.outputs.tag }}
+          name: macOS/iOS Build ${{ steps.tag.outputs.tag }}
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

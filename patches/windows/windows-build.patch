@@ -1,0 +1,52 @@
+diff --git a/ci/build-win32.ps1 b/ci/build-win32.ps1
+index c4cfc4edaf..ede205dadb 100644
+--- a/ci/build-win32.ps1
++++ b/ci/build-win32.ps1
+@@ -224,15 +224,18 @@ clone-recursive = true
+     Set-Content -Path $project.Path -Value $content
+ }
+ 
+-meson setup build `
++$env:BUILD_DIR="build\windows\x86_64"
++
++meson setup $BUILD_DIR `
+     --wrap-mode=forcefallback `
+-    -Ddefault_library=static `
++    --buildtype=release `
++    -Ddefault_library=shared `
+     -Dlibmpv=true `
+-    -Dtests=true `
++    -Dtests=false `
+     -Dgpl=true `
+     -Dffmpeg:gpl=enabled `
+-    -Dffmpeg:tests=enabled `
+-    -Dffmpeg:programs=enabled `
++    -Dffmpeg:tests=false`
++    -Dffmpeg:programs=false`
+     -Dffmpeg:sdl2=disabled `
+     -Dffmpeg:vulkan=auto `
+     -Dffmpeg:libdav1d=enabled `
+@@ -253,18 +256,17 @@ meson setup build `
+     -Dlibplacebo:d3d11=enabled `
+     -Dxxhash:inline-all=true `
+     -Dxxhash:cli=false `
+-    -Dluajit:amalgam=true `
+     -Dd3d11=enabled `
+     -Dvulkan=enabled `
+     -Djavascript=enabled `
+     -Dwin32-smtc=enabled `
+-    -Dlua=luajit `
++    -Dlua=disabled `
+     -Ddrm=disabled `
+     -Dlibarchive=disabled `
+     -Drubberband=disabled `
+     -Dwayland=disabled `
+     -Dx11=disabled
+-ninja -C build mpv.exe mpv.com libmpv.a
+-cp ./build/subprojects/vulkan-loader/vulkan.dll ./build/vulkan-1.dll
+-cp ./etc/mpv-*.bat ./build
+-./build/mpv.com -v --no-config
++ninja -C $BUILD_DIR mpv.exe mpv.com libmpv-2.dll
++cp ./$BUILD_DIR/subprojects/vulkan-loader/vulkan.dll ./$BUILD_DIR/vulkan-1.dll
++cp ./etc/mpv-*.bat ./$BUILD_DIR
++./$BUILD_DIR/mpv.com -v --no-config
