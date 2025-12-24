@@ -25,39 +25,46 @@ if (-not $vsPath) {
     exit 1
 }
 
+# Clean PATH from conflicting tools
+Write-Host "Cleaning PATH from conflicting tools..."
+$env:PATH = ($env:PATH -split ';' | Where-Object { 
+    $_ -ne 'C:\Program Files\LLVM\bin' -and `
+    $_ -ne 'C:\Program Files\CMake\bin' -and `
+    $_ -ne 'C:\Strawberry\c\bin' 
+}) -join ';'
+
+# Add NASM to PATH
+$env:PATH = $env:PATH + ';C:\Program Files\NASM'
+
+# Set VS environment variable
+$env:VS = $vsPath
+
 # Import Visual Studio DevShell module
-$devShellDll = Join-Path $vsPath "Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
-Write-Host "Loading Visual Studio DevShell from: $devShellDll"
-Import-Module $devShellDll
+Write-Host "Loading Visual Studio DevShell from: $vsPath\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
+Import-Module "$vsPath\Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
 
 # Set architecture for VS environment
-$vsArch = if ($Arch -eq "x86_64") { "amd64" } else { $Arch }
+$vsArch = if ($Arch -eq "x86_64") { "x64" } else { $Arch }
 
 Write-Host "Entering Visual Studio developer shell for $vsArch..."
-Enter-VsDevShell -VsInstallPath $vsPath -SkipAutomaticLocation -DevCmdArguments "-arch=$vsArch -host_arch=amd64"
+Enter-VsDevShell -VsInstallPath $env:VS -SkipAutomaticLocation -DevCmdArguments "-arch=$vsArch -host_arch=$vsArch"
 
 Write-Host "Visual Studio environment loaded."
 
 # Change to MPV directory
 Set-Location .cache\mpv
 
-# Get current directory for prefix
-$prefixPath = (Get-Location).Path + "\..\prefix\windows\$Arch"
+# Apply Windows build patch
+Write-Host "Applying Windows build patch..."
+if (Test-Path "..\..\patches\windows-build.patch") {
+    patch -p1 -i ..\..\patches\windows-build.patch
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Patch already applied or failed to apply"
+    }
+}
 
-# Run meson setup
-Write-Host "Configuring build for Windows $Arch..."
-meson setup "build\windows\$Arch" `
-    --default-library=shared `
-    --buildtype=release `
-    -Dwrap_mode=forcefallback `
-    -Dlibmpv=true `
-    -Dgpl=true `
-    -Dshaderc=disabled `
-    -Dharfbuzz:icu=disabled `
-    -Dlibass:require-system-font-provider=false `
-    -DFFmpeg:gpl=enabled `
-    -DFFmpeg:version3=enabled `
-    -DFFmpeg:tls_protocol=enabled `
-    --prefix="$prefixPath"
+# Run mpv's build script
+Write-Host "Running mpv build script for Windows $Arch..."
+.\ci\build-win32.ps1
 
 Write-Host "Windows build configured for $Arch"
