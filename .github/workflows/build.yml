@@ -172,8 +172,8 @@ jobs:
 
       - name: Configure Build (Windows)
         if: matrix.config.platform == 'windows'
-        shell: bash
-        run: ./scripts/configure-windows.sh ${{ matrix.config.arch }}
+        shell: pwsh
+        run: .\scripts\configure-windows.ps1 -Arch ${{ matrix.config.arch }}
 
       - name: Apply macOS/iOS Patch
         if: matrix.config.platform == 'macos'
