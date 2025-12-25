@@ -1,3 +1,36 @@
+diff --git a/osdep/mac/meson.build b/osdep/mac/meson.build
+index abcd1234..efgh5678 100644
+--- a/osdep/mac/meson.build
++++ b/osdep/mac/meson.build
+@@ -33,13 +33,25 @@ endforeach
+ extra_flags = get_option('swift-flags').split()
+ swift_flags += extra_flags
+ 
++# Get libplacebo include directory, handling both internal and external dependencies
++# Internal dependencies (from subprojects) don't support get_variable the same way
++libplacebo_incdir = source_root / 'subprojects' / 'libplacebo' / 'src' / 'include'
++if libplacebo.type_name() == 'pkgconfig'
++    libplacebo_incdir = libplacebo.get_variable('includedir')
++endif
++
++# Get libavutil include directory
++libavutil_incdir = source_root / 'subprojects' / 'FFmpeg'
++if libavutil.type_name() == 'pkgconfig'
++    libavutil_incdir = libavutil.get_variable('includedir')
++endif
++
+ swift_compile = [swift_prog, swift_flags, '-module-name', 'swift',
+                  '-emit-module-path', '@OUTPUT0@', '-import-objc-header', bridge,
+                  '-emit-objc-header-path', '@OUTPUT1@', '-o', '@OUTPUT2@',
+                  '@INPUT@', '-I.', '-I' + source_root, '-I' + source_root / 'include',
+-                 '-I' + libplacebo.get_variable('includedir',
+-                            default_value: source_root / 'subprojects' / 'libplacebo' / 'src' / 'include'),
+-                 '-I' + libavutil.get_variable('includedir')]
++                 '-I' + libplacebo_incdir,
++                 '-I' + libavutil_incdir]
+ 
+ swift_targets = custom_target('swift_targets',
+     input: swift_sources,
 diff --git a/meson.build b/meson.build
 index fb10be5078..42ece8ef04 100644
 --- a/meson.build
