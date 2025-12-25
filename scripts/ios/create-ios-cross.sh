@@ -6,6 +6,8 @@ cat > ios-cross.txt << 'EOF'
 [binaries]
 c = ['xcrun', '-sdk', 'iphoneos', 'clang']
 cpp = ['xcrun', '-sdk', 'iphoneos', 'clang++']
+objc = ['xcrun', '-sdk', 'iphoneos', 'clang']
+objcpp = ['xcrun', '-sdk', 'iphoneos', 'clang++']
 ar = ['xcrun', '-sdk', 'iphoneos', 'ar']
 strip = ['xcrun', '-sdk', 'iphoneos', 'strip']
 

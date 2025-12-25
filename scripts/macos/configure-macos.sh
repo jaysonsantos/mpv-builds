@@ -6,6 +6,7 @@ ARCH="${1:-aarch64}"
 cd .cache/mpv
 
 meson setup "build/macos/${ARCH}" \
+  --native-file ../../macos-native.txt \
   --default-library=shared \
   --buildtype=release \
   -Dwrap_mode=forcefallback \
