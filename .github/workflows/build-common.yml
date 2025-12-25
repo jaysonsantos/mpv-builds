@@ -105,7 +105,8 @@ jobs:
       - name: Install Dependencies (macOS)
         if: runner.os == 'macOS'
         run: |
-          brew install ninja nasm pkg-config meson molten-vk vulkan-headers vulkan-loader
+          brew install ninja nasm pkg-config molten-vk vulkan-headers vulkan-loader
+          pip install meson
 
       - name: Setup Android NDK
         if: inputs.platform == 'android'
