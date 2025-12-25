@@ -13,7 +13,6 @@ meson setup "build/ios/${ARCH}" \
   -Dtests=false \
   -Dgpl=true \
   -Dmoltenvk=enabled \
-  -Dshaderc=enabled \
   -Dharfbuzz:icu=disabled \
   -Dlibass:require-system-font-provider=false \
   -DFFmpeg:gpl=enabled \
