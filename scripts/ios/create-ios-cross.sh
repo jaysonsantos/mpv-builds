@@ -4,7 +4,7 @@ set -e
 # Get the absolute path to the project root
 PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 
-# Create pkgconfig directory for iOS
+# Create pkgconfig directory for iOS (this will be the ONLY place pkg-config searches)
 mkdir -p "${PROJECT_ROOT}/.cache/ios-pkgconfig"
 
 # Create a vulkan.pc that points to libplacebo's bundled Vulkan headers
@@ -22,6 +22,19 @@ EOF
 
 echo "Created vulkan.pc at ${PROJECT_ROOT}/.cache/ios-pkgconfig/vulkan.pc"
 
+# Create a pkg-config wrapper that ONLY searches our iOS pkgconfig directory
+# This prevents finding host system libraries like lcms2 from homebrew
+cat > "${PROJECT_ROOT}/.cache/ios-pkgconfig/pkg-config-ios" << 'WRAPPER'
+#!/bin/bash
+# iOS pkg-config wrapper - only searches iOS-specific pkgconfig directory
+export PKG_CONFIG_PATH=""
+export PKG_CONFIG_LIBDIR="$(dirname "$0")"
+exec pkg-config "$@"
+WRAPPER
+chmod +x "${PROJECT_ROOT}/.cache/ios-pkgconfig/pkg-config-ios"
+
+echo "Created pkg-config wrapper at ${PROJECT_ROOT}/.cache/ios-pkgconfig/pkg-config-ios"
+
 # Create iOS cross file
 cat > ios-cross.txt << EOF
 [binaries]
@@ -31,7 +44,7 @@ objc = ['xcrun', '-sdk', 'iphoneos', 'clang']
 objcpp = ['xcrun', '-sdk', 'iphoneos', 'clang++']
 ar = ['xcrun', '-sdk', 'iphoneos', 'ar']
 strip = ['xcrun', '-sdk', 'iphoneos', 'strip']
-pkgconfig = ['pkg-config']
+pkgconfig = '${PROJECT_ROOT}/.cache/ios-pkgconfig/pkg-config-ios'
 
 [built-in options]
 pkg_config_path = '${PROJECT_ROOT}/.cache/ios-pkgconfig'
