@@ -26,7 +26,9 @@ jobs:
   build:
     name: ${{ inputs.build_name }}
     runs-on: ${{ inputs.runner_os }}
-    
+    env:
+      SCCACHE_DIR: ${{ github.workspace }}/.cache/sccache
+      CACHE_ROOT: ${{ github.workspace }}/.cache
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -50,31 +52,10 @@ jobs:
           restore-keys: |
             mpv-source-v0.41.0-
 
-      - name: Cache sccache (Linux)
-        if: runner.os == 'Linux'
+      - name: Cache sccache
         uses: actions/cache@v4
         with:
           path: ~/.cache/sccache
-          key: sccache-${{ inputs.platform }}-${{ inputs.arch }}-${{ github.sha }}
-          restore-keys: |
-            sccache-${{ inputs.platform }}-${{ inputs.arch }}-
-            sccache-${{ inputs.platform }}-
-
-      - name: Cache sccache (macOS)
-        if: runner.os == 'macOS'
-        uses: actions/cache@v4
-        with:
-          path: ~/Library/Caches/Mozilla.sccache
-          key: sccache-${{ inputs.platform }}-${{ inputs.arch }}-${{ github.sha }}
-          restore-keys: |
-            sccache-${{ inputs.platform }}-${{ inputs.arch }}-
-            sccache-${{ inputs.platform }}-
-
-      - name: Cache sccache (Windows)
-        if: runner.os == 'Windows'
-        uses: actions/cache@v4
-        with:
-          path: ~\AppData\Local\Mozilla\sccache
           key: sccache-${{ inputs.platform }}-${{ inputs.arch }}-${{ github.sha }}
           restore-keys: |
             sccache-${{ inputs.platform }}-${{ inputs.arch }}-
@@ -99,8 +80,8 @@ jobs:
       - name: Install Dependencies (Windows)
         if: runner.os == 'Windows'
         run: |
-          choco install -y ninja nasm pkgconfiglite
-          pip install meson
+          choco install -y nasm
+          pip install meson==1.9.2
 
       - name: Install Dependencies (macOS)
         if: runner.os == 'macOS'
@@ -129,7 +110,6 @@ jobs:
         run: |
           echo "CC=sccache gcc" >> $GITHUB_ENV
           echo "CXX=sccache g++" >> $GITHUB_ENV
-          echo "SCCACHE_DIR=${{ github.workspace }}/.sccache" >> $GITHUB_ENV
 
       - name: Configure sccache environment (Windows)
         if: runner.os == 'Windows'
@@ -137,6 +117,9 @@ jobs:
         run: |
           echo "CC=sccache clang" >> $GITHUB_ENV
           echo "CXX=sccache clang++" >> $GITHUB_ENV
+          echo "CC_LD=lld-link" >> $GITHUB_ENV
+          echo "CXX_LD=lld-link" >> $GITHUB_ENV
+          echo "WINDRES=llvm-rc" >> $GITHUB_ENV
 
       - name: Download MPV Source
         if: steps.cache-mpv.outputs.cache-hit != 'true'
@@ -144,15 +127,15 @@ jobs:
         run: ./scripts/common/download-mpv.sh
 
       - name: Setup Wraps
-        if: steps.cache-mpv.outputs.cache-hit != 'true'
+        if: steps.cache-mpv.outputs.cache-hit != 'true' && inputs.platform != 'windows'
         shell: bash
         run: ./scripts/common/setup-wraps.sh
 
       - name: Clean Build Directories
         shell: bash
         run: |
-          rm -rf .cache/mpv/build
-          rm -rf .cache/prefix/
+          rm -rf "${{ github.workspace }}/.cache/mpv/build"
+          rm -rf "${{ github.workspace }}/.cache/prefix/"
           echo "Cleaned all build directories"
 
       - name: Create Android Cross File
@@ -196,16 +179,17 @@ jobs:
         run: ./scripts/ios/configure-ios.sh ${{ inputs.arch }}
 
       - name: Build
+        if: inputs.platform != 'windows'
         shell: bash
         run: |
-          cd .cache/mpv/build/${{ inputs.platform }}/${{ inputs.arch }}
+          cd "${{ github.workspace }}/.cache/mpv/build/${{ inputs.platform }}/${{ inputs.arch }}"
           ninja install
 
       - name: Copy Android Libraries
         if: inputs.platform == 'android'
         shell: bash
         run: |
-          cd .cache/mpv/build/android/${{ inputs.arch }}
+          cd "${{ github.workspace }}/.cache/mpv/build/android/${{ inputs.arch }}"
           NDK_BIN=$(dirname $(jq -r '.host.cpp.exelist[0]' meson-info/intro-compilers.json))
 
           if echo "$NDK_BIN" | grep -q "aarch64"; then
@@ -214,15 +198,16 @@ jobs:
             ARCH_DIR="x86_64-linux-android"
           fi
 
-          mkdir -p ../../../prefix/android/${{ inputs.arch }}/lib
-          cp "$NDK_BIN/../sysroot/usr/lib/$ARCH_DIR/libc++_shared.so" ../../../prefix/android/${{ inputs.arch }}/lib/ || true
+          mkdir -p "${{ github.workspace }}/.cache/prefix/android/${{ inputs.arch }}/lib"
+          cp "$NDK_BIN/../sysroot/usr/lib/$ARCH_DIR/libc++_shared.so" "${{ github.workspace }}/.cache/prefix/android/${{ inputs.arch }}/lib/" || true
 
       - name: Collect All Libraries
         shell: bash
         run: |
           PLATFORM="${{ inputs.platform }}"
           ARCH="${{ inputs.arch }}"
-          OUTPUT_DIR="collected-libs/${PLATFORM}-${ARCH}"
+          WORKSPACE="${{ github.workspace }}"
+          OUTPUT_DIR="${WORKSPACE}/collected-libs/${PLATFORM}-${ARCH}"
           mkdir -p "${OUTPUT_DIR}"
 
           if [ "$PLATFORM" == "windows" ]; then
@@ -234,10 +219,10 @@ jobs:
           fi
 
           for ext in "${EXTENSIONS[@]}"; do
-            find .cache/prefix/${PLATFORM}/${ARCH} -name "*.${ext}" -exec cp {} "${OUTPUT_DIR}/" \; 2>/dev/null || true
+            find "${WORKSPACE}/.cache/prefix/${PLATFORM}/${ARCH}" -name "*.${ext}" -exec cp {} "${OUTPUT_DIR}/" \; 2>/dev/null || true
           done
 
-          BUILD_DIR=".cache/mpv/build/${PLATFORM}/${ARCH}"
+          BUILD_DIR="${WORKSPACE}/.cache/mpv/build/${PLATFORM}/${ARCH}"
           for ext in "${EXTENSIONS[@]}"; do
             find "${BUILD_DIR}" -name "*.${ext}" -exec cp {} "${OUTPUT_DIR}/" \; 2>/dev/null || true
           done

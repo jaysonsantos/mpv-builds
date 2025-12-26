@@ -1,43 +1,39 @@
-diff --git a/ci/build-win32.ps1 b/ci/build-win32.ps1
-index c4cfc4edaf..ede205dadb 100644
 --- a/ci/build-win32.ps1
 +++ b/ci/build-win32.ps1
-@@ -224,15 +224,19 @@ clone-recursive = true
+@@ -224,15 +224,17 @@
      Set-Content -Path $project.Path -Value $content
  }
  
 -meson setup build `
 +$BUILD_DIR="build\windows\x86_64"
-+
 +meson setup $BUILD_DIR `
      --wrap-mode=forcefallback `
+     -Ddefault_library=static `
 +    --buildtype=release `
-     -Ddefault_library=shared `
      -Dlibmpv=true `
 -    -Dtests=true `
-+    -Dcplayer=false `
 +    -Dtests=false `
++    -Dcplayer=false `
      -Dgpl=true `
      -Dffmpeg:gpl=enabled `
 -    -Dffmpeg:tests=enabled `
 -    -Dffmpeg:programs=enabled `
-+    -Dffmpeg:tests=false `
-+    -Dffmpeg:programs=false `
++    -Dffmpeg:tests=disabled `
++    -Dffmpeg:programs=disabled `
      -Dffmpeg:sdl2=disabled `
      -Dffmpeg:vulkan=auto `
      -Dffmpeg:libdav1d=enabled `
-@@ -253,18 +256,18 @@ meson setup build `
+@@ -251,20 +254,16 @@
+     -Dlibplacebo:tests=false `
+     -Dlibplacebo:vulkan=enabled `
      -Dlibplacebo:d3d11=enabled `
-+    -Dshaderc:SHADERC_SKIP_TESTS=ON `
-+    -Dshaderc:SHADERC_SKIP_EXAMPLES=ON `
-+    -Dshaderc:SHADERC_SKIP_COPYRIGHT_CHECK=ON `
      -Dxxhash:inline-all=true `
      -Dxxhash:cli=false `
 -    -Dluajit:amalgam=true `
      -Dd3d11=enabled `
      -Dvulkan=enabled `
-+    -Dshaderc=disabled `
-     -Djavascript=enabled `
+-    -Djavascript=enabled `
++    -Djavascript=disabled `
      -Dwin32-smtc=enabled `
 -    -Dlua=luajit `
 +    -Dlua=disabled `
@@ -50,7 +46,4 @@ index c4cfc4edaf..ede205dadb 100644
 -cp ./build/subprojects/vulkan-loader/vulkan.dll ./build/vulkan-1.dll
 -cp ./etc/mpv-*.bat ./build
 -./build/mpv.com -v --no-config
-+ninja -C $BUILD_DIR libmpv-2.dll
-+cp ./$BUILD_DIR/subprojects/vulkan-loader/vulkan.dll ./$BUILD_DIR/vulkan-1.dll || true
-+cp ./etc/mpv-*.bat ./$BUILD_DIR || true
-+echo "Windows build completed"
++ninja -C $BUILD_DIR mpv-2.dll

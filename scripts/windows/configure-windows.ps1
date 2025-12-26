@@ -12,7 +12,7 @@ $vsPath = $null
 foreach ($edition in $editions) {
     $testPath = Join-Path $vsBasePath $edition
     $devShellPath = Join-Path $testPath "Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
-    
+
     if (Test-Path $devShellPath) {
         $vsPath = $testPath
         Write-Host "Found Visual Studio 2022 $edition edition"
@@ -27,10 +27,10 @@ if (-not $vsPath) {
 
 # Clean PATH from conflicting tools
 Write-Host "Cleaning PATH from conflicting tools..."
-$env:PATH = ($env:PATH -split ';' | Where-Object { 
+$env:PATH = ($env:PATH -split ';' | Where-Object {
     $_ -ne 'C:\Program Files\LLVM\bin' -and `
     $_ -ne 'C:\Program Files\CMake\bin' -and `
-    $_ -ne 'C:\Strawberry\c\bin' 
+    $_ -ne 'C:\Strawberry\c\bin'
 }) -join ';'
 
 # Add NASM to PATH
@@ -61,6 +61,13 @@ if (Test-Path "..\..\patches\windows\windows-build.patch") {
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Patch already applied or failed to apply"
     }
+}
+
+meson wrap update-db
+
+$wraps = @("expat", "harfbuzz", "libpng", "zlib")
+foreach ($wrap in $wraps) {
+    meson wrap install $wrap
 }
 
 # Run mpv's build script
