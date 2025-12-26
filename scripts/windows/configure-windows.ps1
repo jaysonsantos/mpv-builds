@@ -98,6 +98,7 @@ opts = cmake.subproject_options()
 opts.add_cmake_defines({
     'CMAKE_MSVC_RUNTIME_LIBRARY': 'MultiThreadedDLL',
     'CMAKE_POLICY_DEFAULT_CMP0091': 'NEW',
+    'BUILD_SHARED_LIBS': 'OFF',
     'SHADERC_SKIP_INSTALL': 'ON',
     'SHADERC_SKIP_TESTS': 'ON',
     'SHADERC_SKIP_EXAMPLES': 'ON',
@@ -126,6 +127,7 @@ opts = cmake.subproject_options()
 opts.add_cmake_defines({
     'CMAKE_MSVC_RUNTIME_LIBRARY': 'MultiThreadedDLL',
     'CMAKE_POLICY_DEFAULT_CMP0091': 'NEW',
+    'BUILD_SHARED_LIBS': 'OFF',
     'SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS': 'ON',
     'SPIRV_CROSS_CLI': 'OFF',
     'SPIRV_CROSS_ENABLE_TESTS': 'OFF',
