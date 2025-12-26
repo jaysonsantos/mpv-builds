@@ -11,11 +11,11 @@ meson setup "build/macos/${ARCH}" \
   --buildtype=release \
   -Dwrap_mode=forcefallback \
   -Dlibmpv=true \
+  -Dcplayer=false \
   -Dtests=false \
   -Dgpl=true \
   -Dmoltenvk=enabled \
   -Dshaderc=disabled \
-  -Dswift-build=disabled \
   -Dlibplacebo:lcms=enabled \
   -Dharfbuzz:icu=disabled \
   -Dlibass:require-system-font-provider=false \

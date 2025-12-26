@@ -10,12 +10,14 @@ meson setup "build/ios/${ARCH}" \
   --buildtype=release \
   -Dwrap_mode=forcefallback \
   -Dlibmpv=true \
+  -Dcplayer=false \
   -Dtests=false \
   -Dgpl=true \
   -Dmoltenvk=enabled \
+  -Dshaderc=disabled \
   -Dharfbuzz:icu=disabled \
   -Dlibass:require-system-font-provider=false \
-  -Dlibplacebo:lcms=enabled \
+  -Dlibplacebo:lcms=disabled \
   -DFFmpeg:gpl=enabled \
   -DFFmpeg:version3=enabled \
   -DFFmpeg:mbedtls=enabled \

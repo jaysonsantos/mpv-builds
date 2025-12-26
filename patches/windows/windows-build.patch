@@ -2,7 +2,7 @@ diff --git a/ci/build-win32.ps1 b/ci/build-win32.ps1
 index c4cfc4edaf..ede205dadb 100644
 --- a/ci/build-win32.ps1
 +++ b/ci/build-win32.ps1
-@@ -224,15 +224,18 @@ clone-recursive = true
+@@ -224,15 +224,19 @@ clone-recursive = true
      Set-Content -Path $project.Path -Value $content
  }
  
@@ -15,6 +15,7 @@ index c4cfc4edaf..ede205dadb 100644
      -Ddefault_library=static `
      -Dlibmpv=true `
 -    -Dtests=true `
++    -Dcplayer=false `
 +    -Dtests=false `
      -Dgpl=true `
      -Dffmpeg:gpl=enabled `
@@ -25,13 +26,14 @@ index c4cfc4edaf..ede205dadb 100644
      -Dffmpeg:sdl2=disabled `
      -Dffmpeg:vulkan=auto `
      -Dffmpeg:libdav1d=enabled `
-@@ -253,18 +256,17 @@ meson setup build `
+@@ -253,18 +256,18 @@ meson setup build `
      -Dlibplacebo:d3d11=enabled `
      -Dxxhash:inline-all=true `
      -Dxxhash:cli=false `
 -    -Dluajit:amalgam=true `
      -Dd3d11=enabled `
      -Dvulkan=enabled `
++    -Dshaderc=disabled `
      -Djavascript=enabled `
      -Dwin32-smtc=enabled `
 -    -Dlua=luajit `

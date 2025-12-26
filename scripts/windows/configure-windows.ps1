@@ -56,8 +56,8 @@ Set-Location .cache\mpv
 
 # Apply Windows build patch
 Write-Host "Applying Windows build patch..."
-if (Test-Path "..\..\patches\windows-build.patch") {
-    patch -p1 -i ..\..\patches\windows-build.patch
+if (Test-Path "..\..\patches\windows\windows-build.patch") {
+    patch -p1 -i "..\..\patches\windows\windows-build.patch"
     if ($LASTEXITCODE -ne 0) {
         Write-Host "Patch already applied or failed to apply"
     }
