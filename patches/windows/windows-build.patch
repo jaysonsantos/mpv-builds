@@ -12,7 +12,7 @@ index c4cfc4edaf..ede205dadb 100644
 +meson setup $BUILD_DIR `
      --wrap-mode=forcefallback `
 +    --buildtype=release `
-     -Ddefault_library=static `
+     -Ddefault_library=shared `
      -Dlibmpv=true `
 -    -Dtests=true `
 +    -Dcplayer=false `
@@ -50,7 +50,7 @@ index c4cfc4edaf..ede205dadb 100644
 -cp ./build/subprojects/vulkan-loader/vulkan.dll ./build/vulkan-1.dll
 -cp ./etc/mpv-*.bat ./build
 -./build/mpv.com -v --no-config
-+ninja -C $BUILD_DIR libmpv.a
++ninja -C $BUILD_DIR libmpv-2.dll
 +cp ./$BUILD_DIR/subprojects/vulkan-loader/vulkan.dll ./$BUILD_DIR/vulkan-1.dll || true
 +cp ./etc/mpv-*.bat ./$BUILD_DIR || true
 +echo "Windows build completed"
