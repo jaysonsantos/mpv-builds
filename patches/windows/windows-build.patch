@@ -28,6 +28,9 @@ index c4cfc4edaf..ede205dadb 100644
      -Dffmpeg:libdav1d=enabled `
 @@ -253,18 +256,18 @@ meson setup build `
      -Dlibplacebo:d3d11=enabled `
++    -Dshaderc:SHADERC_SKIP_TESTS=ON `
++    -Dshaderc:SHADERC_SKIP_EXAMPLES=ON `
++    -Dshaderc:SHADERC_SKIP_COPYRIGHT_CHECK=ON `
      -Dxxhash:inline-all=true `
      -Dxxhash:cli=false `
 -    -Dluajit:amalgam=true `
