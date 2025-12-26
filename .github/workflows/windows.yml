@@ -21,6 +21,9 @@ on:
       - 'wraps/**'
   workflow_dispatch:
 
+env:
+  MPV_VERSION: "0.41.0"
+
 jobs:
   build-x86_64:
     uses: ./.github/workflows/build-common.yml
@@ -54,23 +57,26 @@ jobs:
           cd artifacts
           for dir in */; do
             dirname=${dir%/}
-            tar -czf ${dirname}.tar.gz -C ${dirname} .
+            # Rename to include mpv version: windows-x86_64 -> windows-x86_64-mpv-0.41.0
+            tar -czf "${dirname}-mpv-${{ env.MPV_VERSION }}.tar.gz" -C "${dirname}" .
           done
           ls -lh *.tar.gz
 
-      - name: Generate Release Tag
-        id: tag
+      - name: Delete Existing Release Tag
         run: |
-          TAG="windows-build-$(date +%Y%m%d-%H%M%S)"
-          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          TAG="windows-x86_64-mpv-${{ env.MPV_VERSION }}"
+          gh release delete "${TAG}" --yes || true
+          git push origin --delete "refs/tags/${TAG}" || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create Release
+      - name: Create Release for x86_64
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.tag.outputs.tag }}
-          name: Windows Build ${{ steps.tag.outputs.tag }}
+          tag_name: windows-x86_64-mpv-${{ env.MPV_VERSION }}
+          name: Windows x86_64 - mpv ${{ env.MPV_VERSION }}
           draft: false
           prerelease: false
           files: |
-            artifacts/*.tar.gz
+            artifacts/windows-x86_64-mpv-${{ env.MPV_VERSION }}.tar.gz
           token: ${{ secrets.GITHUB_TOKEN }}

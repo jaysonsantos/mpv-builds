@@ -10,6 +10,7 @@ on:
       - 'scripts/ios/**'
       - 'scripts/common/**'
       - 'patches/macos/**'
+      - 'patches/macios/**'
       - 'wraps/**'
   pull_request:
     branches: [main, master]
@@ -22,6 +23,9 @@ on:
       - 'patches/macios/**'
       - 'wraps/**'
   workflow_dispatch:
+
+env:
+  MPV_VERSION: "0.41.0"
 
 jobs:
   build-macos:
@@ -66,23 +70,39 @@ jobs:
           cd artifacts
           for dir in */; do
             dirname=${dir%/}
-            tar -czf ${dirname}.tar.gz -C ${dirname} .
+            # Rename to include mpv version: macos-aarch64 -> macos-aarch64-mpv-0.41.0
+            tar -czf "${dirname}-mpv-${{ env.MPV_VERSION }}.tar.gz" -C "${dirname}" .
           done
           ls -lh *.tar.gz
 
-      - name: Generate Release Tag
-        id: tag
+      - name: Delete Existing Release Tags
         run: |
-          TAG="macos-ios-build-$(date +%Y%m%d-%H%M%S)"
-          echo "tag=${TAG}" >> $GITHUB_OUTPUT
+          for platform in macos ios; do
+            TAG="${platform}-aarch64-mpv-${{ env.MPV_VERSION }}"
+            gh release delete "${TAG}" --yes || true
+            git push origin --delete "refs/tags/${TAG}" || true
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create Release
+      - name: Create Release for macOS
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.tag.outputs.tag }}
-          name: macOS/iOS Build ${{ steps.tag.outputs.tag }}
+          tag_name: macos-aarch64-mpv-${{ env.MPV_VERSION }}
+          name: macOS aarch64 - mpv ${{ env.MPV_VERSION }}
           draft: false
           prerelease: false
           files: |
-            artifacts/*.tar.gz
+            artifacts/macos-aarch64-mpv-${{ env.MPV_VERSION }}.tar.gz
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release for iOS
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ios-aarch64-mpv-${{ env.MPV_VERSION }}
+          name: iOS aarch64 - mpv ${{ env.MPV_VERSION }}
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/ios-aarch64-mpv-${{ env.MPV_VERSION }}.tar.gz
           token: ${{ secrets.GITHUB_TOKEN }}
