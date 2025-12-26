@@ -7,7 +7,7 @@ index c4cfc4edaf..ede205dadb 100644
  }
  
 -meson setup build `
-+$env:BUILD_DIR="build\windows\x86_64"
++$BUILD_DIR="build\windows\x86_64"
 +
 +meson setup $BUILD_DIR `
      --wrap-mode=forcefallback `
