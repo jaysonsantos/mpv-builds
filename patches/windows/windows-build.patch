@@ -15,7 +15,7 @@ index c4cfc4edaf..e14916a470 100644
      -Dlibmpv=true `
 -    -Dtests=true `
 +    -Dtests=false `
-+    -Dcplayer=false `
++    -Dcplayer=true `
      -Dgpl=true `
      -Dffmpeg:gpl=enabled `
 -    -Dffmpeg:tests=enabled `

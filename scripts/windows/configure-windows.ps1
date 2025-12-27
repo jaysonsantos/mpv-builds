@@ -73,7 +73,7 @@ foreach ($wrap in $wraps) {
 
 $gstreamerWraps = @("libjpeg-turbo")
 foreach ($wrap in $gstreamerWraps) {
-    curl -Lsqo "subprojects/${wrap}.wrap" "${GStreamerWrapsUrl}/${wrap}.wrap"
+    curl.exe -Lsqo "subprojects/${wrap}.wrap" "${GStreamerWrapsUrl}/${wrap}.wrap"
 }
 
 # Run mpv's build script
