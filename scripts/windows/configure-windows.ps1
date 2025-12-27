@@ -3,7 +3,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
-$GStreamerWrapsUrl = https://gitlab.freedesktop.org/gstreamer/gstreamer/-/raw/main/subprojects
+$GStreamerWrapsUrl = "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/raw/main/subprojects"
 
 # Find Visual Studio 2022 installation
 $vsBasePath = "C:\Program Files\Microsoft Visual Studio\2022"
