@@ -65,7 +65,7 @@ if (Test-Path "..\..\patches\windows\windows-build.patch") {
 
 meson wrap update-db
 
-$wraps = @("expat", "harfbuzz", "libpng", "zlib")
+$wraps = @("expat", "harfbuzz", "libpng", "zlib", "libjpeg-turbo")
 foreach ($wrap in $wraps) {
     meson wrap install $wrap
 }
