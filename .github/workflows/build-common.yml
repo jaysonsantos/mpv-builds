@@ -247,3 +247,11 @@ jobs:
       - name: sccache stats
         shell: bash
         run: sccache --show-stats
+
+      - name: Upload workdir on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.artifact_name }}-workdir-debug
+          path: ${{ github.workspace }}
+          retention-days: 3
