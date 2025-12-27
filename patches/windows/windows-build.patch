@@ -1,8 +1,16 @@
 diff --git a/ci/build-win32.ps1 b/ci/build-win32.ps1
-index c4cfc4edaf..5bfc753788 100644
+index c4cfc4edaf..a71624911a 100644
 --- a/ci/build-win32.ps1
 +++ b/ci/build-win32.ps1
-@@ -224,15 +224,18 @@ clone-recursive = true
+@@ -121,6 +121,7 @@ opts.add_cmake_defines({
+     'CMAKE_MSVC_RUNTIME_LIBRARY': 'MultiThreaded',
+     'BUILD_SHARED_LIBS': 'OFF',
+     'BUILD_TESTING': 'OFF',
++    'JPEGXL_VERSION': '0.12.0',
+ })
+ libjxl_proj = cmake.subproject('libjxl-cmake', options: opts)
+ libjxl_dep = declare_dependency(dependencies: [
+@@ -224,15 +225,18 @@ clone-recursive = true
      Set-Content -Path $project.Path -Value $content
  }
  
@@ -25,7 +33,7 @@ index c4cfc4edaf..5bfc753788 100644
      -Dffmpeg:sdl2=disabled `
      -Dffmpeg:vulkan=auto `
      -Dffmpeg:libdav1d=enabled `
-@@ -253,18 +256,14 @@ meson setup build `
+@@ -253,18 +257,14 @@ meson setup build `
      -Dlibplacebo:d3d11=enabled `
      -Dxxhash:inline-all=true `
      -Dxxhash:cli=false `
