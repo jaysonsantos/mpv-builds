@@ -4,21 +4,21 @@ on:
   push:
     branches: [main, master]
     paths:
-      - '.github/workflows/windows.yml'
-      - '.github/workflows/build-common.yml'
-      - 'scripts/windows/**'
-      - 'scripts/common/**'
-      - 'patches/windows/**'
-      - 'wraps/**'
+      - ".github/workflows/windows.yml"
+      - ".github/workflows/build-common.yml"
+      - "scripts/windows/**"
+      - "scripts/common/**"
+      - "patches/windows/**"
+      - "wraps/**"
   pull_request:
     branches: [main, master]
     paths:
-      - '.github/workflows/windows.yml'
-      - '.github/workflows/build-common.yml'
-      - 'scripts/windows/**'
-      - 'scripts/common/**'
-      - 'patches/windows/**'
-      - 'wraps/**'
+      - ".github/workflows/windows.yml"
+      - ".github/workflows/build-common.yml"
+      - "scripts/windows/**"
+      - "scripts/common/**"
+      - "patches/windows/**"
+      - "wraps/**"
   workflow_dispatch:
 
 env:
@@ -34,6 +34,11 @@ jobs:
       library_type: shared
       artifact_name: windows-x86_64
       build_name: Windows x86_64
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      SCCACHE_BUCKET: ${{ secrets.SCCACHE_BUCKET }}
+      SCCACHE_ENDPOINT: ${{ secrets.SCCACHE_ENDPOINT }}
 
   create-release:
     name: Create Release
