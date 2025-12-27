@@ -186,7 +186,6 @@ jobs:
         run: ./scripts/ios/configure-ios.sh ${{ inputs.arch }}
 
       - name: Build
-        if: inputs.platform != 'windows'
         shell: bash
         run: |
           cd "${{ github.workspace }}/.cache/mpv/build/${{ inputs.platform }}/${{ inputs.arch }}"
