@@ -3,6 +3,7 @@ param(
 )
 
 $ErrorActionPreference = "Stop"
+$GStreamerWrapsUrl = https://gitlab.freedesktop.org/gstreamer/gstreamer/-/raw/main/subprojects
 
 # Find Visual Studio 2022 installation
 $vsBasePath = "C:\Program Files\Microsoft Visual Studio\2022"
@@ -65,9 +66,14 @@ if (Test-Path "..\..\patches\windows\windows-build.patch") {
 
 meson wrap update-db
 
-$wraps = @("expat", "harfbuzz", "libpng", "zlib", "libjpeg-turbo")
+$wraps = @("expat", "harfbuzz", "libpng", "zlib")
 foreach ($wrap in $wraps) {
     meson wrap install $wrap
+}
+
+$gstreamerWraps = @("libjpeg-turbo")
+foreach ($wrap in $gstreamerWraps) {
+    curl -Lsqo "subprojects/${wrap}.wrap" "${GStreamerWrapsUrl}/${wrap}.wrap"
 }
 
 # Run mpv's build script
