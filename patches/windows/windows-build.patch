@@ -1,5 +1,5 @@
 diff --git a/ci/build-win32.ps1 b/ci/build-win32.ps1
-index c4cfc4edaf..0e306000f0 100644
+index c4cfc4edaf..3d7496674a 100644
 --- a/ci/build-win32.ps1
 +++ b/ci/build-win32.ps1
 @@ -121,6 +121,7 @@ opts.add_cmake_defines({
@@ -10,12 +10,106 @@ index c4cfc4edaf..0e306000f0 100644
  })
  libjxl_proj = cmake.subproject('libjxl-cmake', options: opts)
  libjxl_dep = declare_dependency(dependencies: [
-@@ -224,15 +225,18 @@ clone-recursive = true
+@@ -133,7 +134,10 @@ libjxl_dep = declare_dependency(dependencies: [
+     libjxl_proj.dependency('brotlienc'),
+ ])
+ meson.override_dependency('libjxl', libjxl_dep)
+-libjxl_threads_dep = libjxl_proj.dependency('jxl_threads')
++libjxl_threads_dep = declare_dependency(
++    dependencies: libjxl_proj.dependency('jxl_threads'),
++    version: meson.project_version(),
++)
+ meson.override_dependency('libjxl_threads', libjxl_threads_dep)
+ "@
+ 
+@@ -148,6 +152,10 @@ opts.add_cmake_defines({
+     'CMAKE_MSVC_RUNTIME_LIBRARY': 'MultiThreaded',
+     'BUILD_SHARED_LIBS': 'OFF',
+     'BUILD_TESTING': 'OFF',
++    'ENABLE_EXAMPLES': 'OFF',
++    'ENABLE_TESTS': 'OFF',
++    'ENABLE_TESTDATA': 'OFF',
++    'ENABLE_TOOLS': 'OFF',
+ })
+ aom_proj = cmake.subproject('aom-cmake', options: opts)
+ aom_dep = aom_proj.dependency('aom')
+@@ -156,8 +164,8 @@ meson.override_dependency('aom', aom_dep)
+ 
+ $projects = @(
+     @{
+-        Path = "$subprojects/ffmpeg.wrap"
+-        URL = "https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg.git"
++        Path     = "$subprojects/ffmpeg.wrap"
++        URL      = "https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg.git"
+         Revision = "meson-8.0"
+         Provides = @(
+             "dependency_names = libavcodec, libavdevice, libavfilter, libavformat, libavutil, libswresample, libswscale"
+@@ -165,43 +173,43 @@ $projects = @(
+         )
+     },
+     @{
+-        Path = "$subprojects/libass.wrap"
+-        URL = "https://github.com/libass/libass"
++        Path     = "$subprojects/libass.wrap"
++        URL      = "https://github.com/libass/libass"
+         Revision = "master"
+     },
+     @{
+-        Path = "$subprojects/libplacebo.wrap"
+-        URL = "https://code.videolan.org/videolan/libplacebo.git"
++        Path     = "$subprojects/libplacebo.wrap"
++        URL      = "https://code.videolan.org/videolan/libplacebo.git"
+         Revision = "master"
+     },
+     @{
+-        Path = "$subprojects/dav1d.wrap"
+-        URL = "https://code.videolan.org/videolan/dav1d"
++        Path     = "$subprojects/dav1d.wrap"
++        URL      = "https://code.videolan.org/videolan/dav1d"
+         Revision = "master"
+         Provides = @(
+             "dav1d = dav1d_dep"
+         )
+     },
+     @{
+-        Path = "$subprojects/spirv-cross.wrap"
+-        URL = "https://github.com/KhronosGroup/SPIRV-Cross"
++        Path     = "$subprojects/spirv-cross.wrap"
++        URL      = "https://github.com/KhronosGroup/SPIRV-Cross"
+         Revision = "main"
+-        Method = "cmake"
++        Method   = "cmake"
+     },
+     @{
+-        Path = "$subprojects/vulkan-loader.wrap"
+-        URL = "https://github.com/KhronosGroup/Vulkan-Loader"
++        Path     = "$subprojects/vulkan-loader.wrap"
++        URL      = "https://github.com/KhronosGroup/Vulkan-Loader"
+         Revision = "main"
+-        Method = "cmake"
++        Method   = "cmake"
+     },
+     @{
+-        Path = "$subprojects/libjxl-cmake.wrap"
+-        URL = "https://github.com/libjxl/libjxl"
++        Path     = "$subprojects/libjxl-cmake.wrap"
++        URL      = "https://github.com/libjxl/libjxl"
+         Revision = "main"
+     },
+     @{
+-        Path = "$subprojects/aom-cmake.wrap"
+-        URL = "https://aomedia.googlesource.com/aom"
++        Path     = "$subprojects/aom-cmake.wrap"
++        URL      = "https://aomedia.googlesource.com/aom"
+         Revision = "main"
+     }
+ )
+@@ -224,15 +232,18 @@ clone-recursive = true
      Set-Content -Path $project.Path -Value $content
  }
  
 -meson setup build `
-+$BUILD_DIR="build\windows\x86_64"
++$BUILD_DIR = "build\windows\x86_64"
 +meson setup $BUILD_DIR `
      --wrap-mode=forcefallback `
      -Ddefault_library=static `
@@ -33,7 +127,7 @@ index c4cfc4edaf..0e306000f0 100644
      -Dffmpeg:sdl2=disabled `
      -Dffmpeg:vulkan=auto `
      -Dffmpeg:libdav1d=enabled `
-@@ -253,18 +257,14 @@ meson setup build `
+@@ -253,18 +264,14 @@ meson setup build `
      -Dlibplacebo:d3d11=enabled `
      -Dxxhash:inline-all=true `
      -Dxxhash:cli=false `

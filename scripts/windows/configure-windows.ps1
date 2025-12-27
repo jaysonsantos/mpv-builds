@@ -29,10 +29,10 @@ if (-not $vsPath) {
 # Clean PATH from conflicting tools
 Write-Host "Cleaning PATH from conflicting tools..."
 $env:PATH = ($env:PATH -split ';' | Where-Object {
-    $_ -ne 'C:\Program Files\LLVM\bin' -and `
-    $_ -ne 'C:\Program Files\CMake\bin' -and `
-    $_ -ne 'C:\Strawberry\c\bin'
-}) -join ';'
+        $_ -ne 'C:\Program Files\LLVM\bin' -and `
+            $_ -ne 'C:\Program Files\CMake\bin' -and `
+            $_ -ne 'C:\Strawberry\c\bin'
+    }) -join ';'
 
 # Add NASM to PATH
 $env:PATH = $env:PATH + ';C:\Program Files\NASM'
@@ -71,9 +71,14 @@ foreach ($wrap in $wraps) {
     meson wrap install $wrap
 }
 
-$gstreamerWraps = @("libjpeg-turbo")
+$gstreamerWraps = @("libjpeg-turbo", "freetype2")
 foreach ($wrap in $gstreamerWraps) {
     curl.exe -Lsqo "subprojects/${wrap}.wrap" "${GStreamerWrapsUrl}/${wrap}.wrap"
+}
+
+$copyWraps = @("lcms2", "fribidi")
+foreach ($wrap in $copyWraps) {
+    Copy-Item "../../wraps/${wrap}.wrap" "subprojects/"
 }
 
 # Run mpv's build script
