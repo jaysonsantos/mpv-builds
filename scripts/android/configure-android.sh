@@ -6,14 +6,36 @@ ARCH="${1:-aarch64}"
 cd .cache/mpv
 
 # Apply FFmpeg JNI fix patch for Android
-if [ -f "../../patches/android/ffmpeg-jni-fix.patch" ]; then
-  echo "Applying FFmpeg JNI fix patch for Android..."
-  if [ -d "subprojects/FFmpeg" ]; then
-    cd subprojects/FFmpeg
-    patch -p1 < ../../../../patches/android/ffmpeg-jni-fix.patch || echo "Patch already applied or failed"
-    cd ../..
+PATCH_FILE="../../patches/android/ffmpeg-jni-fix.patch"
+if [ ! -f "$PATCH_FILE" ]; then
+  echo "::error::FFmpeg JNI patch not found at $PATCH_FILE"
+  exit 1
+fi
+
+if [ ! -d "subprojects/FFmpeg" ]; then
+  echo "::error::FFmpeg subproject directory not found. Please run setup-wraps.sh first."
+  exit 1
+fi
+
+echo "::group::Applying FFmpeg JNI fix patch for Android"
+cd subprojects/FFmpeg
+
+# Try to apply the patch
+if patch -p1 --dry-run < ../../../../patches/android/ffmpeg-jni-fix.patch > /dev/null 2>&1; then
+  # Patch can be applied
+  patch -p1 < ../../../../patches/android/ffmpeg-jni-fix.patch
+  echo "Patch applied successfully"
+else
+  # Check if patch is already applied
+  if patch -p1 -R --dry-run < ../../../../patches/android/ffmpeg-jni-fix.patch > /dev/null 2>&1; then
+    echo "Patch already applied, skipping"
+  else
+    echo "::warning::Failed to apply FFmpeg JNI patch - patch may be incompatible or corrupted"
   fi
 fi
+
+cd ../..
+echo "::endgroup::"
 
 ASM_FLAGS=""
 if [ "$ARCH" == "x86_64" ]; then
