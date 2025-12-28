@@ -130,7 +130,7 @@ jobs:
       - name: Setup Wraps
         if: steps.cache-mpv.outputs.cache-hit != 'true' && inputs.platform != 'windows'
         shell: bash
-        run: ./scripts/common/setup-wraps.sh ${{ inputs.platform }}
+        run: ./scripts/common/setup-wraps.sh
 
       - name: Clean Build Directories
         shell: bash

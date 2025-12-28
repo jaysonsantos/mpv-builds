@@ -21,7 +21,6 @@ meson setup "build/macos/${ARCH}" \
   -Dlibass:require-system-font-provider=false \
   -DFFmpeg:gpl=enabled \
   -DFFmpeg:version3=enabled \
-  -DFFmpeg:mbedtls=enabled \
   -DFFmpeg:tls_protocol=enabled \
   --prefix="$(pwd)/../prefix/macos/${ARCH}"
 
