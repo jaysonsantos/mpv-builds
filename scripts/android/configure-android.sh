@@ -20,8 +20,8 @@ fi
 echo "::group::Applying FFmpeg JNI fix patch for Android"
 cd subprojects/FFmpeg
 
-# Adjust patch path relative to FFmpeg directory
-PATCH_PATH="../../$PATCH_FILE"
+# Patch path relative to FFmpeg directory
+PATCH_PATH="../../../../patches/android/ffmpeg-jni-fix.patch"
 
 # Try to apply the patch
 if patch -p1 --dry-run < "$PATCH_PATH" > /dev/null 2>&1; then
