@@ -32,6 +32,20 @@ index 52782f73d6..81bc9312ef 100644
  
  # macOS features
  option('macos-10-15-4-features', type: 'feature', value: 'auto', description: 'macOS 10.15.4 SDK Features')
+diff --git a/osdep/mac/meson.build b/osdep/mac/meson.build
+index 1660528841..ba6aec1ccd 100644
+--- a/osdep/mac/meson.build
++++ b/osdep/mac/meson.build
+@@ -40,7 +40,8 @@ swift_compile = [swift_prog, swift_flags, '-module-name', 'swift',
+                  '@INPUT@', '-I.', '-I' + source_root, '-I' + source_root / 'include',
+                  '-I' + libplacebo.get_variable('includedir',
+                             default_value: source_root / 'subprojects' / 'libplacebo' / 'src' / 'include'),
+-                 '-I' + libavutil.get_variable('includedir')]
++                 '-I' + libavutil.get_variable('includedir',
++                            default_value: source_root / 'subprojects' / 'FFmpeg')]
+ 
+ swift_targets = custom_target('swift_targets',
+     input: swift_sources,
 diff --git a/video/out/gpu/context.c b/video/out/gpu/context.c
 index 60c0641a70..a1e3952785 100644
 --- a/video/out/gpu/context.c

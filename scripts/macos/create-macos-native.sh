@@ -4,10 +4,10 @@ set -e
 # Create macOS native file
 cat > macos-native.txt << 'EOF'
 [binaries]
-c = ['clang']
-cpp = ['clang++']
-objc = ['clang']
-objcpp = ['clang++']
+c = ['sccache', 'clang']
+cpp = ['sccache', 'clang++']
+objc = ['sccache', 'clang']
+objcpp = ['sccache', 'clang++']
 
 [properties]
 
