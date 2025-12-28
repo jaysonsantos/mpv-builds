@@ -34,7 +34,6 @@ else
     echo "Patch already applied, skipping"
   else
     echo "::error::Failed to apply FFmpeg JNI patch - patch may be incompatible or corrupted"
-    cd ../..
     exit 1
   fi
 fi
