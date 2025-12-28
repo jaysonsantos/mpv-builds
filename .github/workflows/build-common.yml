@@ -63,7 +63,6 @@ jobs:
             .cache/mpv
             !.cache/mpv/build
             !.cache/mpv/subprojects/*/build*
-            !.cache/mpv/subprojects/*/.git
           key: mpv-source-v0.41.0-${{ inputs.platform }}-${{ inputs.arch }}-${{ hashFiles('.cache/mpv/meson.build') }}
           restore-keys: |
             mpv-source-v0.41.0-${{ inputs.platform }}-${{ inputs.arch }}-
