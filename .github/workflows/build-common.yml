@@ -197,8 +197,10 @@ jobs:
         if: inputs.platform == 'android'
         shell: bash
         run: |
+          set -x
           cd "${{ github.workspace }}/.cache/mpv/build/android/${{ inputs.arch }}"
           NDK_BIN=$(dirname $(jq -r '.host.cpp.exelist[0]' meson-info/intro-compilers.json))
+          ARCH_DIR=""
 
           if echo "$NDK_BIN" | grep -q "aarch64"; then
             ARCH_DIR="aarch64-linux-android"
