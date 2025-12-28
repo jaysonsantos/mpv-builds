@@ -44,10 +44,16 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           # Find the latest Xcode version installed
-          LATEST_XCODE=$(ls -d /Applications/Xcode*.app | sort -V | tail -n 1)
-          echo "Selected Xcode: $LATEST_XCODE"
-          sudo xcode-select -s "$LATEST_XCODE"
-          xcodebuild -version
+          # Use find to safely handle filenames and sort by modification time
+          LATEST_XCODE=$(find /Applications -name 'Xcode*.app' -maxdepth 1 -type d | sort | tail -n 1)
+          if [ -n "$LATEST_XCODE" ]; then
+            echo "Selected Xcode: $LATEST_XCODE"
+            sudo xcode-select -s "$LATEST_XCODE"
+            xcodebuild -version
+          else
+            echo "Using default Xcode"
+            xcodebuild -version
+          fi
 
       - name: Cache MPV Source
         id: cache-mpv
