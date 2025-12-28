@@ -5,7 +5,7 @@ Cross-platform build system for libmpv libraries, designed for embedding mpv in 
 ## Project Overview
 
 This repository builds `libmpv` and its dependencies for multiple platforms:
-- **Android** (aarch64, x86_64) - shared libraries (.so)
+- **Android** (aarch64, x86_64) - shared (.so) and static (.a) libraries
 - **iOS** (aarch64) - static libraries (.a)
 - **macOS** (aarch64) - shared libraries (.dylib)
 - **Windows** (x86_64) - shared libraries (.dll)

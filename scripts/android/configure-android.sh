@@ -12,7 +12,7 @@ fi
 
 # shellcheck disable=SC2086
 meson setup "build/android/${ARCH}" \
-  --default-library=shared \
+  --default-library=both \
   --buildtype=release \
   -Dwrap_mode=forcefallback \
   -Dlibmpv=true \

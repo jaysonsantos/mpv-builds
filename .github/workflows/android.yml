@@ -31,7 +31,7 @@ jobs:
       platform: android
       arch: x86_64
       runner_os: ubuntu-latest
-      library_type: shared
+      library_type: both
       artifact_name: android-x86_64
       build_name: Android x86_64
     secrets:
@@ -46,7 +46,7 @@ jobs:
       platform: android
       arch: aarch64
       runner_os: ubuntu-latest
-      library_type: shared
+      library_type: both
       artifact_name: android-aarch64
       build_name: Android aarch64
     secrets:
