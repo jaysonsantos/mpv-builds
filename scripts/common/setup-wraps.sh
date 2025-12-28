@@ -24,14 +24,4 @@ fi
 echo "Downloading subprojects..."
 meson subprojects download || true
 
-# Apply FFmpeg JNI fix patch for Android
-if [ -f "../../patches/ffmpeg-jni-fix.patch" ]; then
-  echo "Applying FFmpeg JNI fix patch..."
-  if [ -d "subprojects/FFmpeg" ]; then
-    cd subprojects/FFmpeg
-    patch -p1 < ../../../../patches/ffmpeg-jni-fix.patch || echo "Patch already applied or failed"
-    cd ../..
-  fi
-fi
-
-echo "Wraps configured and patches applied"
+echo "Wraps configured"
