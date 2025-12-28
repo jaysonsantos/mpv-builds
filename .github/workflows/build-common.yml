@@ -57,8 +57,8 @@ jobs:
       - name: Cache sccache
         uses: actions/cache@v4
         with:
-          path: .sccache
-          key: sccache-${{ inputs.platform }}-${{ inputs.arch }}-${{ github.sha }}
+          path: ${{ github.workspace }}/.sccache
+          key: sccache-${{ inputs.platform }}-${{ inputs.arch }}-${{ github.run_id }}
           restore-keys: |
             sccache-${{ inputs.platform }}-${{ inputs.arch }}-
 
