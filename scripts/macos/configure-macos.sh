@@ -16,7 +16,7 @@ meson setup "build/macos/${ARCH}" \
   -Dgpl=true \
   -Dmoltenvk=enabled \
   -Dshaderc=disabled \
-  -Dlibplacebo:lcms=disabled \
+  -Dlibplacebo:lcms=enabled \
   -Dharfbuzz:icu=disabled \
   -Dlibass:require-system-font-provider=false \
   -DFFmpeg:gpl=enabled \
