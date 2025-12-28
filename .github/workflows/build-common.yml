@@ -43,9 +43,8 @@ jobs:
       - name: Select Latest Xcode
         if: runner.os == 'macOS'
         run: |
-          # Find the latest Xcode version installed
-          # Use find to safely handle filenames and sort by modification time
-          LATEST_XCODE=$(find /Applications -name 'Xcode*.app' -maxdepth 1 -type d | sort | tail -n 1)
+          # Find the latest Xcode version by modification time
+          LATEST_XCODE=$(find /Applications -name 'Xcode*.app' -maxdepth 1 -type d -print0 | xargs -0 ls -td 2>/dev/null | head -n 1)
           if [ -n "$LATEST_XCODE" ]; then
             echo "Selected Xcode: $LATEST_XCODE"
             sudo xcode-select -s "$LATEST_XCODE"
