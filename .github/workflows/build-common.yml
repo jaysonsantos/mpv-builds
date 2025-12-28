@@ -45,19 +45,14 @@ jobs:
         run: |
           # Find and select the latest Xcode by modification time
           # On GitHub Actions runners, the newest Xcode is typically the most recently installed
-          XCODE_APPS=$(find /Applications -name 'Xcode*.app' -maxdepth 1 -type d 2>/dev/null)
-          if [ -n "$XCODE_APPS" ]; then
-            LATEST_XCODE=$(echo "$XCODE_APPS" | xargs ls -td 2>/dev/null | head -n 1)
-            if [ -n "$LATEST_XCODE" ]; then
-              echo "Selected Xcode: $LATEST_XCODE"
-              sudo xcode-select -s "$LATEST_XCODE"
-              xcodebuild -version
-            else
-              echo "Using default Xcode"
-              xcodebuild -version
-            fi
+          LATEST_XCODE=$(find /Applications -name 'Xcode*.app' -maxdepth 1 -type d -print0 2>/dev/null | \
+                         xargs -0 ls -td 2>/dev/null | head -n 1)
+          if [ -n "$LATEST_XCODE" ]; then
+            echo "Selected Xcode: $LATEST_XCODE"
+            sudo xcode-select -s "$LATEST_XCODE"
+            xcodebuild -version
           else
-            echo "No Xcode installations found, using default"
+            echo "No Xcode installations found or using default Xcode"
             xcodebuild -version
           fi
 
