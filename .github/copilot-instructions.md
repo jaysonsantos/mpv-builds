@@ -16,7 +16,7 @@ This repository builds `libmpv` and its dependencies for multiple platforms (And
 - Use `${}` syntax for variable expansion: `"${ARCH}"`
 - Default parameters: `ARCH="${1:-aarch64}"`
 - Use heredocs for multi-line file generation
-- Add `# shellcheck disable=SCXXXX` comments when needed
+- Add `# shellcheck disable=SC####` comments when needed (e.g., `# shellcheck disable=SC2086`)
 
 ### PowerShell Scripts
 - Start with `$ErrorActionPreference = "Stop"`
@@ -111,7 +111,7 @@ This repository builds `libmpv` and its dependencies for multiple platforms (And
 ## Important Files
 
 - `AGENTS.md`: Comprehensive documentation (more detailed than this file)
-- `scripts/common/download-mpv.sh`: Downloads mpv v0.41.0 source
+- `scripts/common/download-mpv.sh`: Downloads mpv source (check script for current version)
 - `scripts/common/setup-wraps.sh`: Installs Meson wrap dependencies
 - `patches/macios/macios.patch`: Adds MoltenVK Vulkan context for macOS/iOS
 - `.github/workflows/build-common.yml`: Reusable workflow for all platforms
