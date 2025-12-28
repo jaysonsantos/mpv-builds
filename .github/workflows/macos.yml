@@ -37,6 +37,11 @@ jobs:
       library_type: shared
       artifact_name: macos-aarch64
       build_name: macOS aarch64
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      SCCACHE_BUCKET: ${{ secrets.SCCACHE_BUCKET }}
+      SCCACHE_ENDPOINT: ${{ secrets.SCCACHE_ENDPOINT }}
 
   build-ios:
     uses: ./.github/workflows/build-common.yml
@@ -47,6 +52,11 @@ jobs:
       library_type: static
       artifact_name: ios-aarch64
       build_name: iOS aarch64
+    secrets:
+      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+      SCCACHE_BUCKET: ${{ secrets.SCCACHE_BUCKET }}
+      SCCACHE_ENDPOINT: ${{ secrets.SCCACHE_ENDPOINT }}
 
   create-release:
     name: Create Release

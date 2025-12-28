@@ -9,6 +9,7 @@ meson setup "build/ios/${ARCH}" \
   --default-library=static \
   --buildtype=release \
   -Dwrap_mode=forcefallback \
+  -Dcoreaudio=disabled \
   -Dlibmpv=true \
   -Dcplayer=false \
   -Dtests=false \

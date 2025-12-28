@@ -1,8 +1,11 @@
 param(
+    [Parameter(Mandatory=$true)]
+    [string]$Prefix,
     [string]$Arch = "x86_64"
 )
 
 $ErrorActionPreference = "Stop"
+$GStreamerWrapsUrl = "https://gitlab.freedesktop.org/gstreamer/gstreamer/-/raw/main/subprojects"
 
 # Find Visual Studio 2022 installation
 $vsBasePath = "C:\Program Files\Microsoft Visual Studio\2022"
@@ -12,7 +15,7 @@ $vsPath = $null
 foreach ($edition in $editions) {
     $testPath = Join-Path $vsBasePath $edition
     $devShellPath = Join-Path $testPath "Common7\Tools\Microsoft.VisualStudio.DevShell.dll"
-    
+
     if (Test-Path $devShellPath) {
         $vsPath = $testPath
         Write-Host "Found Visual Studio 2022 $edition edition"
@@ -27,11 +30,11 @@ if (-not $vsPath) {
 
 # Clean PATH from conflicting tools
 Write-Host "Cleaning PATH from conflicting tools..."
-$env:PATH = ($env:PATH -split ';' | Where-Object { 
-    $_ -ne 'C:\Program Files\LLVM\bin' -and `
-    $_ -ne 'C:\Program Files\CMake\bin' -and `
-    $_ -ne 'C:\Strawberry\c\bin' 
-}) -join ';'
+$env:PATH = ($env:PATH -split ';' | Where-Object {
+        $_ -ne 'C:\Program Files\LLVM\bin' -and `
+            $_ -ne 'C:\Program Files\CMake\bin' -and `
+            $_ -ne 'C:\Strawberry\c\bin'
+    }) -join ';'
 
 # Add NASM to PATH
 $env:PATH = $env:PATH + ';C:\Program Files\NASM'
@@ -63,8 +66,25 @@ if (Test-Path "..\..\patches\windows\windows-build.patch") {
     }
 }
 
+meson wrap update-db
+
+$wraps = @("expat", "harfbuzz", "libpng", "zlib")
+foreach ($wrap in $wraps) {
+    meson wrap install $wrap
+}
+
+$gstreamerWraps = @("libjpeg-turbo", "freetype2")
+foreach ($wrap in $gstreamerWraps) {
+    curl.exe -Lsqo "subprojects/${wrap}.wrap" "${GStreamerWrapsUrl}/${wrap}.wrap"
+}
+
+$copyWraps = @("lcms2", "fribidi")
+foreach ($wrap in $copyWraps) {
+    Copy-Item "../../wraps/${wrap}.wrap" "subprojects/"
+}
+
 # Run mpv's build script
 Write-Host "Running mpv build script for Windows $Arch..."
-.\ci\build-win32.ps1
+.\ci\build-win32.ps1 -Prefix $Prefix
 
 Write-Host "Windows build configured for $Arch"

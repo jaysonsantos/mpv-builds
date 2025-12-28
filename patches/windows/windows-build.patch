@@ -1,43 +1,160 @@
 diff --git a/ci/build-win32.ps1 b/ci/build-win32.ps1
-index c4cfc4edaf..ede205dadb 100644
+index c4cfc4edaf..586f336c71 100644
 --- a/ci/build-win32.ps1
 +++ b/ci/build-win32.ps1
-@@ -224,15 +224,19 @@ clone-recursive = true
+@@ -1,3 +1,8 @@
++param(
++    [Parameter(Mandatory=$true)]
++    [string]$Prefix
++)
++
+ $ErrorActionPreference = "Stop"
+ $PSNativeCommandUseErrorActionPreference = $true
+ Set-StrictMode -Version Latest
+@@ -103,7 +108,7 @@ opts.add_cmake_defines({
+     'UPDATE_DEPS': 'ON',
+     'USE_GAS': 'ON',
+ })
+-opts.append_link_args(['-lcfgmgr32', '-Wl,/def:../subprojects/vulkan-loader/loader/vulkan-1.def'], target: 'vulkan')
++opts.append_link_args(['-lcfgmgr32', '-Wl,/def:../../../subprojects/vulkan-loader/loader/vulkan-1.def'], target: 'vulkan')
+ vulkan_proj = cmake.subproject('vulkan-loader', options: opts)
+ vulkan_dep = vulkan_proj.dependency('vulkan')
+ meson.override_dependency('vulkan', vulkan_dep)
+@@ -121,6 +126,7 @@ opts.add_cmake_defines({
+     'CMAKE_MSVC_RUNTIME_LIBRARY': 'MultiThreaded',
+     'BUILD_SHARED_LIBS': 'OFF',
+     'BUILD_TESTING': 'OFF',
++    'JPEGXL_VERSION': '0.12.0',
+ })
+ libjxl_proj = cmake.subproject('libjxl-cmake', options: opts)
+ libjxl_dep = declare_dependency(dependencies: [
+@@ -133,7 +139,10 @@ libjxl_dep = declare_dependency(dependencies: [
+     libjxl_proj.dependency('brotlienc'),
+ ])
+ meson.override_dependency('libjxl', libjxl_dep)
+-libjxl_threads_dep = libjxl_proj.dependency('jxl_threads')
++libjxl_threads_dep = declare_dependency(
++    dependencies: libjxl_proj.dependency('jxl_threads'),
++    version: meson.project_version(),
++)
+ meson.override_dependency('libjxl_threads', libjxl_threads_dep)
+ "@
+ 
+@@ -148,6 +157,10 @@ opts.add_cmake_defines({
+     'CMAKE_MSVC_RUNTIME_LIBRARY': 'MultiThreaded',
+     'BUILD_SHARED_LIBS': 'OFF',
+     'BUILD_TESTING': 'OFF',
++    'ENABLE_EXAMPLES': 'OFF',
++    'ENABLE_TESTS': 'OFF',
++    'ENABLE_TESTDATA': 'OFF',
++    'ENABLE_TOOLS': 'OFF',
+ })
+ aom_proj = cmake.subproject('aom-cmake', options: opts)
+ aom_dep = aom_proj.dependency('aom')
+@@ -156,8 +169,8 @@ meson.override_dependency('aom', aom_dep)
+ 
+ $projects = @(
+     @{
+-        Path = "$subprojects/ffmpeg.wrap"
+-        URL = "https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg.git"
++        Path     = "$subprojects/ffmpeg.wrap"
++        URL      = "https://gitlab.freedesktop.org/gstreamer/meson-ports/ffmpeg.git"
+         Revision = "meson-8.0"
+         Provides = @(
+             "dependency_names = libavcodec, libavdevice, libavfilter, libavformat, libavutil, libswresample, libswscale"
+@@ -165,43 +178,43 @@ $projects = @(
+         )
+     },
+     @{
+-        Path = "$subprojects/libass.wrap"
+-        URL = "https://github.com/libass/libass"
++        Path     = "$subprojects/libass.wrap"
++        URL      = "https://github.com/libass/libass"
+         Revision = "master"
+     },
+     @{
+-        Path = "$subprojects/libplacebo.wrap"
+-        URL = "https://code.videolan.org/videolan/libplacebo.git"
++        Path     = "$subprojects/libplacebo.wrap"
++        URL      = "https://code.videolan.org/videolan/libplacebo.git"
+         Revision = "master"
+     },
+     @{
+-        Path = "$subprojects/dav1d.wrap"
+-        URL = "https://code.videolan.org/videolan/dav1d"
++        Path     = "$subprojects/dav1d.wrap"
++        URL      = "https://code.videolan.org/videolan/dav1d"
+         Revision = "master"
+         Provides = @(
+             "dav1d = dav1d_dep"
+         )
+     },
+     @{
+-        Path = "$subprojects/spirv-cross.wrap"
+-        URL = "https://github.com/KhronosGroup/SPIRV-Cross"
++        Path     = "$subprojects/spirv-cross.wrap"
++        URL      = "https://github.com/KhronosGroup/SPIRV-Cross"
+         Revision = "main"
+-        Method = "cmake"
++        Method   = "cmake"
+     },
+     @{
+-        Path = "$subprojects/vulkan-loader.wrap"
+-        URL = "https://github.com/KhronosGroup/Vulkan-Loader"
++        Path     = "$subprojects/vulkan-loader.wrap"
++        URL      = "https://github.com/KhronosGroup/Vulkan-Loader"
+         Revision = "main"
+-        Method = "cmake"
++        Method   = "cmake"
+     },
+     @{
+-        Path = "$subprojects/libjxl-cmake.wrap"
+-        URL = "https://github.com/libjxl/libjxl"
++        Path     = "$subprojects/libjxl-cmake.wrap"
++        URL      = "https://github.com/libjxl/libjxl"
+         Revision = "main"
+     },
+     @{
+-        Path = "$subprojects/aom-cmake.wrap"
+-        URL = "https://aomedia.googlesource.com/aom"
++        Path     = "$subprojects/aom-cmake.wrap"
++        URL      = "https://aomedia.googlesource.com/aom"
+         Revision = "main"
+     }
+ )
+@@ -224,15 +237,19 @@ clone-recursive = true
      Set-Content -Path $project.Path -Value $content
  }
  
 -meson setup build `
-+$BUILD_DIR="build\windows\x86_64"
-+
++$BUILD_DIR = "build\windows\x86_64"
 +meson setup $BUILD_DIR `
++    --prefix=$Prefix `
      --wrap-mode=forcefallback `
+     -Ddefault_library=static `
 +    --buildtype=release `
-     -Ddefault_library=shared `
      -Dlibmpv=true `
 -    -Dtests=true `
-+    -Dcplayer=false `
 +    -Dtests=false `
++    -Dcplayer=false `
      -Dgpl=true `
      -Dffmpeg:gpl=enabled `
 -    -Dffmpeg:tests=enabled `
 -    -Dffmpeg:programs=enabled `
-+    -Dffmpeg:tests=false `
-+    -Dffmpeg:programs=false `
++    -Dffmpeg:tests=disabled `
++    -Dffmpeg:programs=disabled `
      -Dffmpeg:sdl2=disabled `
      -Dffmpeg:vulkan=auto `
      -Dffmpeg:libdav1d=enabled `
-@@ -253,18 +256,18 @@ meson setup build `
+@@ -253,18 +270,14 @@ meson setup build `
      -Dlibplacebo:d3d11=enabled `
-+    -Dshaderc:SHADERC_SKIP_TESTS=ON `
-+    -Dshaderc:SHADERC_SKIP_EXAMPLES=ON `
-+    -Dshaderc:SHADERC_SKIP_COPYRIGHT_CHECK=ON `
      -Dxxhash:inline-all=true `
      -Dxxhash:cli=false `
 -    -Dluajit:amalgam=true `
      -Dd3d11=enabled `
      -Dvulkan=enabled `
-+    -Dshaderc=disabled `
-     -Djavascript=enabled `
+-    -Djavascript=enabled `
++    -Djavascript=disabled `
      -Dwin32-smtc=enabled `
 -    -Dlua=luajit `
 +    -Dlua=disabled `
@@ -50,7 +167,4 @@ index c4cfc4edaf..ede205dadb 100644
 -cp ./build/subprojects/vulkan-loader/vulkan.dll ./build/vulkan-1.dll
 -cp ./etc/mpv-*.bat ./build
 -./build/mpv.com -v --no-config
-+ninja -C $BUILD_DIR libmpv-2.dll
-+cp ./$BUILD_DIR/subprojects/vulkan-loader/vulkan.dll ./$BUILD_DIR/vulkan-1.dll || true
-+cp ./etc/mpv-*.bat ./$BUILD_DIR || true
-+echo "Windows build completed"
++ninja.exe -C "$BUILD_DIR" install
