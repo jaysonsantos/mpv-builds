@@ -16,11 +16,12 @@ meson setup "build/macos/${ARCH}" \
   -Dgpl=true \
   -Dmoltenvk=enabled \
   -Dshaderc=disabled \
-  -Dlibplacebo:lcms=enabled \
+  -Dlibplacebo:lcms=disabled \
   -Dharfbuzz:icu=disabled \
   -Dlibass:require-system-font-provider=false \
   -DFFmpeg:gpl=enabled \
   -DFFmpeg:version3=enabled \
+  -DFFmpeg:mbedtls=enabled \
   -DFFmpeg:tls_protocol=enabled \
   --prefix="$(pwd)/../prefix/macos/${ARCH}"
 
