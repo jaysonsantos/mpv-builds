@@ -26,6 +26,7 @@ meson setup "build/android/${ARCH}" \
   -DFFmpeg:mbedtls=enabled \
   -DFFmpeg:tls_protocol=enabled \
   -DFFmpeg:jni=enabled \
+  # pthreads is required for JNI support (see patches/android/ffmpeg-jni-fix.patch)
   -DFFmpeg:pthreads=enabled \
   --cross-file "../../android-${ARCH}-cross.txt" \
   --prefix="$(pwd)/../prefix/android/${ARCH}"
