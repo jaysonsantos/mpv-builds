@@ -20,14 +20,17 @@ fi
 echo "::group::Applying FFmpeg JNI fix patch for Android"
 cd subprojects/FFmpeg
 
+# Adjust patch path relative to FFmpeg directory
+PATCH_PATH="../../../../patches/android/ffmpeg-jni-fix.patch"
+
 # Try to apply the patch
-if patch -p1 --dry-run < ../../../../patches/android/ffmpeg-jni-fix.patch > /dev/null 2>&1; then
+if patch -p1 --dry-run < "$PATCH_PATH" > /dev/null 2>&1; then
   # Patch can be applied
-  patch -p1 < ../../../../patches/android/ffmpeg-jni-fix.patch
+  patch -p1 < "$PATCH_PATH"
   echo "Patch applied successfully"
 else
   # Check if patch is already applied
-  if patch -p1 -R --dry-run < ../../../../patches/android/ffmpeg-jni-fix.patch > /dev/null 2>&1; then
+  if patch -p1 -R --dry-run < "$PATCH_PATH" > /dev/null 2>&1; then
     echo "Patch already applied, skipping"
   else
     echo "::warning::Failed to apply FFmpeg JNI patch - patch may be incompatible or corrupted"
