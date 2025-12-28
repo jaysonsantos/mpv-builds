@@ -49,34 +49,48 @@ else
 fi
 echo "::endgroup::"
 
-# Extract NDK bin directory from intro-compilers.json
+# Extract NDK bin directory from intro-compilers.json or use 'which'
 echo "::group::Extracting NDK Binary Path"
 if command -v jq &> /dev/null; then
     CPP_COMPILER=$(jq -r '.host.cpp.exelist[0]' meson-info/intro-compilers.json)
-    echo "C++ compiler path: ${CPP_COMPILER}"
-    NDK_BIN=$(dirname "${CPP_COMPILER}")
-    echo "NDK bin directory: ${NDK_BIN}"
+    echo "C++ compiler from meson: ${CPP_COMPILER}"
 else
     echo "::warning::jq not found, attempting fallback method"
     # Fallback: try to parse manually
     CPP_COMPILER=$(grep -oP '"exelist":\s*\[\s*"\K[^"]+' meson-info/intro-compilers.json | head -n1)
-    echo "C++ compiler path (fallback): ${CPP_COMPILER}"
-    NDK_BIN=$(dirname "${CPP_COMPILER}")
-    echo "NDK bin directory (fallback): ${NDK_BIN}"
+    echo "C++ compiler from meson (fallback): ${CPP_COMPILER}"
 fi
+
+# If the compiler path is relative (just the binary name), resolve it using 'which'
+if [[ "${CPP_COMPILER}" != /* ]]; then
+    echo "Compiler path is relative, resolving using 'which'..."
+    CPP_COMPILER_FULL=$(which "${CPP_COMPILER}" 2>/dev/null || echo "")
+    if [ -n "${CPP_COMPILER_FULL}" ]; then
+        echo "Resolved full compiler path: ${CPP_COMPILER_FULL}"
+        CPP_COMPILER="${CPP_COMPILER_FULL}"
+    else
+        echo "::warning::Could not resolve compiler path using 'which'"
+    fi
+fi
+
+echo "Final C++ compiler path: ${CPP_COMPILER}"
+NDK_BIN=$(dirname "${CPP_COMPILER}")
+echo "NDK bin directory: ${NDK_BIN}"
 echo "::endgroup::"
 
 # Determine architecture directory name in NDK
 echo "::group::Determining NDK Architecture"
 ARCH_DIR=""
-if echo "${NDK_BIN}" | grep -q "aarch64"; then
+
+# Try to detect from compiler path
+if echo "${CPP_COMPILER}" | grep -q "aarch64"; then
     ARCH_DIR="aarch64-linux-android"
-    echo "Detected architecture: aarch64 (ARM64)"
-elif echo "${NDK_BIN}" | grep -q "x86_64"; then
+    echo "Detected architecture from compiler path: aarch64 (ARM64)"
+elif echo "${CPP_COMPILER}" | grep -q "x86_64"; then
     ARCH_DIR="x86_64-linux-android"
-    echo "Detected architecture: x86_64"
+    echo "Detected architecture from compiler path: x86_64"
 else
-    echo "::warning::Could not detect architecture from NDK bin path"
+    echo "::warning::Could not detect architecture from compiler path"
     # Fallback based on input argument
     if [ "${ARCH}" == "aarch64" ]; then
         ARCH_DIR="aarch64-linux-android"
@@ -90,22 +104,34 @@ echo "NDK architecture directory: ${ARCH_DIR}"
 echo "::endgroup::"
 
 # Construct path to libc++_shared.so
-LIBCPP_SOURCE="${NDK_BIN}/../sysroot/usr/lib/${ARCH_DIR}/libc++_shared.so"
 echo "::group::Locating libc++_shared.so"
-echo "Expected path: ${LIBCPP_SOURCE}"
 
-# Resolve path and check if it exists
-LIBCPP_SOURCE_RESOLVED=$(realpath "${LIBCPP_SOURCE}" 2>/dev/null || echo "${LIBCPP_SOURCE}")
-echo "Resolved path: ${LIBCPP_SOURCE_RESOLVED}"
+# Try multiple possible paths
+LIBCPP_CANDIDATES=(
+    "${NDK_BIN}/../sysroot/usr/lib/${ARCH_DIR}/libc++_shared.so"
+    "${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/lib/${ARCH_DIR}/libc++_shared.so"
+)
 
-if [ -f "${LIBCPP_SOURCE_RESOLVED}" ]; then
-    echo "✓ libc++_shared.so found"
-    ls -lh "${LIBCPP_SOURCE_RESOLVED}"
-else
-    echo "::warning::libc++_shared.so NOT found at expected location"
-    echo ""
-    echo "Searching for libc++_shared.so in NDK..."
-    find "${NDK_BIN}/.." -name "libc++_shared.so" 2>/dev/null || echo "No libc++_shared.so found in NDK"
+LIBCPP_SOURCE=""
+for candidate in "${LIBCPP_CANDIDATES[@]}"; do
+    echo "Checking: ${candidate}"
+    if [ -f "${candidate}" ]; then
+        LIBCPP_SOURCE="${candidate}"
+        echo "✓ Found libc++_shared.so at: ${LIBCPP_SOURCE}"
+        ls -lh "${LIBCPP_SOURCE}"
+        break
+    fi
+done
+
+if [ -z "${LIBCPP_SOURCE}" ]; then
+    echo "::warning::libc++_shared.so NOT found at expected locations"
+    echo "Searching for libc++_shared.so in ANDROID_NDK_HOME..."
+    if [ -n "${ANDROID_NDK_HOME}" ]; then
+        find "${ANDROID_NDK_HOME}" -name "libc++_shared.so" -path "*/sysroot/usr/lib/${ARCH_DIR}/*" 2>/dev/null | head -n 1 | while read -r found_path; do
+            echo "Found via search: ${found_path}"
+            LIBCPP_SOURCE="${found_path}"
+        done
+    fi
 fi
 echo "::endgroup::"
 
@@ -119,8 +145,8 @@ echo "::endgroup::"
 
 # Copy libc++_shared.so
 echo "::group::Copying libc++_shared.so"
-if [ -f "${LIBCPP_SOURCE_RESOLVED}" ]; then
-    cp -v "${LIBCPP_SOURCE_RESOLVED}" "${DEST_LIB_DIR}/"
+if [ -n "${LIBCPP_SOURCE}" ] && [ -f "${LIBCPP_SOURCE}" ]; then
+    cp -v "${LIBCPP_SOURCE}" "${DEST_LIB_DIR}/"
     echo "✓ Successfully copied libc++_shared.so"
 else
     echo "::error::libc++_shared.so not found, skipping copy"
