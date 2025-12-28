@@ -196,20 +196,7 @@ jobs:
       - name: Copy Android Libraries
         if: inputs.platform == 'android'
         shell: bash
-        run: |
-          set -x
-          cd "${{ github.workspace }}/.cache/mpv/build/android/${{ inputs.arch }}"
-          NDK_BIN=$(dirname $(jq -r '.host.cpp.exelist[0]' meson-info/intro-compilers.json))
-          ARCH_DIR=""
-
-          if echo "$NDK_BIN" | grep -q "aarch64"; then
-            ARCH_DIR="aarch64-linux-android"
-          elif echo "$NDK_BIN" | grep -q "x86_64"; then
-            ARCH_DIR="x86_64-linux-android"
-          fi
-
-          mkdir -p "${{ github.workspace }}/.cache/prefix/android/${{ inputs.arch }}/lib"
-          cp "$NDK_BIN/../sysroot/usr/lib/$ARCH_DIR/libc++_shared.so" "${{ github.workspace }}/.cache/prefix/android/${{ inputs.arch }}/lib/" || true
+        run: ./scripts/android/copy-android-libraries.sh ${{ inputs.arch }}
 
       - name: Collect All Libraries
         shell: bash
