@@ -64,9 +64,9 @@ jobs:
             !.cache/mpv/build
             !.cache/mpv/subprojects/*/build*
             !.cache/mpv/subprojects/*/.git
-          key: mpv-source-v0.41.0-${{ hashFiles('.cache/mpv/meson.build') }}
+          key: mpv-source-v0.41.0-${{ inputs.platform }}-${{ inputs.arch }}-${{ hashFiles('.cache/mpv/meson.build') }}
           restore-keys: |
-            mpv-source-v0.41.0-
+            mpv-source-v0.41.0-${{ inputs.platform }}-${{ inputs.arch }}-
 
       - name: Setup sccache
         uses: mozilla-actions/sccache-action@v0.0.6
