@@ -132,7 +132,7 @@ index c4cfc4edaf..cdf898735f 100644
 +    --prefix=$Prefix `
      --wrap-mode=forcefallback `
 -    -Ddefault_library=static `
-+    -Ddefault_library=both `
++    -Ddefault_library=shared `
 +    --buildtype=release `
      -Dlibmpv=true `
 -    -Dtests=true `
