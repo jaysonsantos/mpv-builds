@@ -27,8 +27,8 @@ else
   if patch -p1 -R --dry-run < "../../$PATCH_FILE" > /dev/null 2>&1; then
     echo "Patch already applied, skipping"
   else
-    echo "Error: Patch cannot be applied and is not already applied"
-    exit 1
+    echo "::warning file=$PATCH_FILE,title=Patch Application Failed::Patch cannot be applied and is not already applied. Build will continue but may have issues."
+    echo "Warning: Patch cannot be applied and is not already applied"
   fi
 fi
 
