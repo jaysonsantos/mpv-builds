@@ -1,4 +1,6 @@
 param(
+    [Parameter(Mandatory=$true)]
+    [string]$Prefix,
     [string]$Arch = "x86_64"
 )
 
@@ -83,6 +85,6 @@ foreach ($wrap in $copyWraps) {
 
 # Run mpv's build script
 Write-Host "Running mpv build script for Windows $Arch..."
-.\ci\build-win32.ps1
+.\ci\build-win32.ps1 -Prefix $Prefix
 
 Write-Host "Windows build configured for $Arch"

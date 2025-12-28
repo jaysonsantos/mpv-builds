@@ -158,7 +158,7 @@ jobs:
       - name: Configure Build (Windows)
         if: inputs.platform == 'windows'
         shell: pwsh
-        run: .\scripts\windows\configure-windows.ps1 -Arch ${{ inputs.arch }}
+        run: .\scripts\windows\configure-windows.ps1 -Prefix "${{ github.workspace }}/.cache/prefix/windows/${{ inputs.arch }}" -Arch ${{ inputs.arch }}
 
       - name: Apply macOS/iOS Patch
         if: inputs.platform == 'macos' || inputs.platform == 'ios'
