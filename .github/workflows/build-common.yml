@@ -40,6 +40,15 @@ jobs:
         with:
           python-version: "3.12"
 
+      - name: Select Latest Xcode
+        if: runner.os == 'macOS'
+        run: |
+          # Find the latest Xcode version installed
+          LATEST_XCODE=$(ls -d /Applications/Xcode*.app | sort -V | tail -n 1)
+          echo "Selected Xcode: $LATEST_XCODE"
+          sudo xcode-select -s "$LATEST_XCODE"
+          xcodebuild -version
+
       - name: Cache MPV Source
         id: cache-mpv
         uses: actions/cache@v4
