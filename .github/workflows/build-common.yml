@@ -126,6 +126,7 @@ jobs:
           echo "CXX=sccache clang++" >> $GITHUB_ENV
           echo "CC_LD=lld-link" >> $GITHUB_ENV
           echo "CXX_LD=lld-link" >> $GITHUB_ENV
+          echo "AR=llvm-lib" >> $GITHUB_ENV
           echo "WINDRES=llvm-rc" >> $GITHUB_ENV
 
       - name: Download MPV Source
