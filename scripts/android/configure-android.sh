@@ -10,6 +10,8 @@ if [ "$ARCH" == "x86_64" ]; then
   ASM_FLAGS="-Dlibass:asm=disabled -DFFmpeg:x86asm=disabled"
 fi
 
+# Configure meson build
+# Note: -DFFmpeg:pthreads=enabled is required for JNI support (see patches/android/ffmpeg-jni-fix.patch)
 # shellcheck disable=SC2086
 meson setup "build/android/${ARCH}" \
   --default-library=both \
@@ -26,7 +28,6 @@ meson setup "build/android/${ARCH}" \
   -DFFmpeg:mbedtls=enabled \
   -DFFmpeg:tls_protocol=enabled \
   -DFFmpeg:jni=enabled \
-  # pthreads is required for JNI support (see patches/android/ffmpeg-jni-fix.patch)
   -DFFmpeg:pthreads=enabled \
   --cross-file "../../android-${ARCH}-cross.txt" \
   --prefix="$(pwd)/../prefix/android/${ARCH}"
