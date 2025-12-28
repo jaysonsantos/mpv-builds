@@ -17,7 +17,12 @@ fi
 
 cd .cache/mpv
 
-patch -p1 < "../../$PATCH_FILE"
-echo "Patch applied successfully"
+# Check if patch is already applied
+if patch -p1 --dry-run < "../../$PATCH_FILE" > /dev/null 2>&1; then
+  patch -p1 < "../../$PATCH_FILE"
+  echo "Patch applied successfully"
+else
+  echo "Patch already applied or failed dry-run, skipping"
+fi
 
 cd ../..
