@@ -111,7 +111,7 @@ This repository builds `libmpv` and its dependencies for multiple platforms (And
 ## Important Files
 
 - `AGENTS.md`: Comprehensive documentation (more detailed than this file)
-- `scripts/common/download-mpv.sh`: Downloads mpv source (check script for current version)
+- `scripts/common/download-mpv.sh`: Downloads mpv source (see `MPV_VERSION` variable for current version)
 - `scripts/common/setup-wraps.sh`: Installs Meson wrap dependencies
 - `patches/macios/macios.patch`: Adds MoltenVK Vulkan context for macOS/iOS
 - `.github/workflows/build-common.yml`: Reusable workflow for all platforms
