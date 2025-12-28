@@ -21,15 +21,7 @@ on:
       build_name:
         required: true
         type: string
-    secrets:
-      AWS_ACCESS_KEY_ID:
-        required: true
-      AWS_SECRET_ACCESS_KEY:
-        required: true
-      SCCACHE_BUCKET:
-        required: true
-      SCCACHE_ENDPOINT:
-        required: true
+
 
 jobs:
   build:
@@ -37,14 +29,8 @@ jobs:
     runs-on: ${{ inputs.runner_os }}
     env:
       CACHE_ROOT: ${{ github.workspace }}/.cache
-      # sccache R2 configuration (S3-compatible)
-      SCCACHE_BUCKET: ${{ secrets.SCCACHE_BUCKET }}
-      SCCACHE_ENDPOINT: ${{ secrets.SCCACHE_ENDPOINT }}
-      SCCACHE_REGION: auto
-      AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-      AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-      SCCACHE_S3_USE_SSL: "true"
-      SCCACHE_S3_KEY_PREFIX: ${{ inputs.platform }}/${{ inputs.arch }}
+      # sccache local disk cache configuration
+      SCCACHE_DIR: ${{ github.workspace }}/.sccache
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -67,6 +53,14 @@ jobs:
           key: mpv-source-v0.41.0-${{ hashFiles('.cache/mpv/meson.build') }}
           restore-keys: |
             mpv-source-v0.41.0-
+
+      - name: Cache sccache
+        uses: actions/cache@v4
+        with:
+          path: .sccache
+          key: sccache-${{ inputs.platform }}-${{ inputs.arch }}-${{ github.sha }}
+          restore-keys: |
+            sccache-${{ inputs.platform }}-${{ inputs.arch }}-
 
       - name: Setup sccache
         uses: mozilla-actions/sccache-action@v0.0.6
