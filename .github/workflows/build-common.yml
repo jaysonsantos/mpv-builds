@@ -204,6 +204,8 @@ jobs:
             EXTENSIONS=("dll" "lib" "a")
           elif [ "$PLATFORM" == "ios" ]; then
             EXTENSIONS=("a")
+          elif [ "$PLATFORM" == "macos" ]; then
+            EXTENSIONS=("a", "dylib")
           else
             EXTENSIONS=("so" "a")
           fi
