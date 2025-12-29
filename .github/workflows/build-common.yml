@@ -243,6 +243,13 @@ jobs:
             echo "Meson log not found at: $MESON_LOG"
           fi
 
+      - name: Find config.h files on failure
+        if: failure()
+        shell: bash
+        run: |
+          echo "=== Searching for config.h files ==="
+          find .cache/mpv -iname config.h -type f || echo "No config.h files found"
+
       - name: Upload workdir on failure
         if: failure()
         uses: actions/upload-artifact@v4
