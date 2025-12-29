@@ -236,5 +236,8 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.artifact_name }}-workdir-debug
-          path: ${{ github.workspace }}
+          path: |
+            ${{ github.workspace }}
+            ${{ github.workspace }}/.cache/mpv
           retention-days: 3
+          include-hidden-files: true
