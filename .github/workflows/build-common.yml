@@ -231,6 +231,18 @@ jobs:
         shell: bash
         run: sccache --show-stats
 
+      - name: Print meson log on failure
+        if: failure()
+        shell: bash
+        run: |
+          MESON_LOG="${{ github.workspace }}/.cache/mpv/build/${{ inputs.platform }}/${{ inputs.arch }}/meson-logs/meson-log.txt"
+          if [ -f "$MESON_LOG" ]; then
+            echo "=== Meson Build Log ==="
+            cat "$MESON_LOG"
+          else
+            echo "Meson log not found at: $MESON_LOG"
+          fi
+
       - name: Upload workdir on failure
         if: failure()
         uses: actions/upload-artifact@v4
