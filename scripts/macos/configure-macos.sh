@@ -1,9 +1,11 @@
 #!/bin/bash
-set -e
+set -ex
 
 ARCH="${1:-aarch64}"
 
 cd .cache/mpv
+
+grep moltenvk meson.build || (cd ../../ && ./scripts/common/apply-macos-patch.sh)
 
 meson setup "build/macos/${ARCH}" \
   --native-file ../../macos-native.txt \
@@ -25,3 +27,4 @@ meson setup "build/macos/${ARCH}" \
   --prefix="$(pwd)/../prefix/macos/${ARCH}"
 
 echo "macOS build configured for ${ARCH}"
+
