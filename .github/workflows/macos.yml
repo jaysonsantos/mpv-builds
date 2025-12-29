@@ -33,7 +33,7 @@ jobs:
     with:
       platform: macos
       arch: aarch64
-      runner_os: macos-latest
+      runner_os: macos-14
       library_type: shared
       artifact_name: macos-aarch64
       build_name: macOS aarch64
@@ -43,7 +43,7 @@ jobs:
     with:
       platform: ios
       arch: aarch64
-      runner_os: macos-latest
+      runner_os: macos-14
       library_type: static
       artifact_name: ios-aarch64
       build_name: iOS aarch64
