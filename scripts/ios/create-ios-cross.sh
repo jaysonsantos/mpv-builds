@@ -4,7 +4,12 @@ set -e
 # Get the absolute path to the project root
 PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 
-xcode-select -s /Applications/Xcode_26.2.app/Contents/Developer
+if [ "$1" == "no-xcode" ]
+then
+    echo "Skipping Xcode selection"
+else
+    sudo xcode-select -s /Applications/Xcode_26.2.app/Contents/Developer
+fi
 
 SDK_PLATFORM_PATH="$(xcrun -v -sdk iphoneos --show-sdk-platform-path)"
 
