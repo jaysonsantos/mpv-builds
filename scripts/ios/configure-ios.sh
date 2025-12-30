@@ -23,6 +23,7 @@ meson setup "build/ios/${ARCH}" \
   -DFFmpeg:version3=enabled \
   -DFFmpeg:mbedtls=enabled \
   -DFFmpeg:tls_protocol=enabled \
+  -DFFmpeg:tests=disabled \
   --cross-file ../../ios-cross.txt \
   --prefix="$(pwd)/../prefix/ios/${ARCH}"
 

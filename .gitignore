@@ -1,6 +1,7 @@
 .cache
 ios-cross.txt
 macos-native.txt
+local.properties
 
 # Devenv
 .devenv*

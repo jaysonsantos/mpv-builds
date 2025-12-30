@@ -10,6 +10,8 @@
   # https://devenv.sh/basics/
   env.GREET = "devenv";
 
+  apple.sdk = null;
+
   # https://devenv.sh/packages/
   packages = [
     pkgs.git

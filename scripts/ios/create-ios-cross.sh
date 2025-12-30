@@ -38,12 +38,13 @@ echo "Created pkg-config wrapper at ${PROJECT_ROOT}/.cache/ios-pkgconfig/pkg-con
 # Create iOS cross file
 cat > ios-cross.txt << EOF
 [binaries]
-c = ['xcrun', '-sdk', 'iphoneos', 'clang']
-cpp = ['xcrun', '-sdk', 'iphoneos', 'clang++']
-objc = ['xcrun', '-sdk', 'iphoneos', 'clang']
-objcpp = ['xcrun', '-sdk', 'iphoneos', 'clang++']
-ar = ['xcrun', '-sdk', 'iphoneos', 'ar']
-strip = ['xcrun', '-sdk', 'iphoneos', 'strip']
+c = ['/usr/bin/xcrun', '-sdk', 'iphoneos', 'sccache', 'clang']
+cpp = ['/usr/bin/xcrun', '-sdk', 'iphoneos', 'sccache', 'clang++']
+objc = ['/usr/bin/xcrun', '-sdk', 'iphoneos', 'sccache', 'clang']
+objcpp = ['/usr/bin/xcrun', '-sdk', 'iphoneos', 'sccache', 'clang++']
+ar = ['/usr/bin/xcrun', '-sdk', 'iphoneos', 'ar']
+strip = ['/usr/bin/xcrun', '-sdk', 'iphoneos', 'strip']
+ranlib = ['/usr/bin/xcrun', '-sdk', 'iphoneos', 'ranlib']
 pkgconfig = '${PROJECT_ROOT}/.cache/ios-pkgconfig/pkg-config-ios'
 
 [built-in options]
@@ -51,6 +52,7 @@ pkg_config_path = '${PROJECT_ROOT}/.cache/ios-pkgconfig'
 
 [properties]
 sys_root = '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk'
+needs_exe_wrapper = true
 
 [host_machine]
 system = 'darwin'
