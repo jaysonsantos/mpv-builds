@@ -4,6 +4,10 @@ set -e
 # Get the absolute path to the project root
 PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 
+xcode-select -s /Applications/Xcode_26.2.app/Contents/Developer
+
+SDK_PLATFORM_PATH="$(xcrun -v -sdk iphoneos --show-sdk-platform-path)"
+
 # Create pkgconfig directory for iOS (this will be the ONLY place pkg-config searches)
 mkdir -p "${PROJECT_ROOT}/.cache/ios-pkgconfig"
 
@@ -51,7 +55,7 @@ pkgconfig = '${PROJECT_ROOT}/.cache/ios-pkgconfig/pkg-config-ios'
 pkg_config_path = '${PROJECT_ROOT}/.cache/ios-pkgconfig'
 
 [properties]
-sys_root = '/Applications/Xcode.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS.sdk'
+sys_root = '${SDK_PLATFORM_PATH}/Developer/SDKs/iPhoneOS.sdk'
 needs_exe_wrapper = true
 
 [host_machine]
@@ -65,3 +69,4 @@ CMAKE_POSITION_INDEPENDENT_CODE='ON'
 EOF
 
 echo "Created ios-cross.txt"
+cat ios-cross.txt
