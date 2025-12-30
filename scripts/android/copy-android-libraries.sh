@@ -146,7 +146,7 @@ echo "::endgroup::"
 # Copy libc++_shared.so
 echo "::group::Copying libc++_shared.so"
 if [ -n "${LIBCPP_SOURCE}" ] && [ -f "${LIBCPP_SOURCE}" ]; then
-    cp -v "${LIBCPP_SOURCE}" "${DEST_LIB_DIR}/"
+    cp -Pv "${LIBCPP_SOURCE}" "${DEST_LIB_DIR}/"
     echo "✓ Successfully copied libc++_shared.so"
 else
     echo "::error::libc++_shared.so not found, skipping copy"

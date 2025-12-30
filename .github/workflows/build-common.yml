@@ -211,12 +211,12 @@ jobs:
           fi
 
           for ext in "${EXTENSIONS[@]}"; do
-            find "${WORKSPACE}/.cache/prefix/${PLATFORM}/${ARCH}" -name "*.${ext}" -exec cp {} "${OUTPUT_DIR}/" \; 2>/dev/null || true
+            find "${WORKSPACE}/.cache/prefix/${PLATFORM}/${ARCH}" -name "*.${ext}" -exec cp -P {} "${OUTPUT_DIR}/" \; 2>/dev/null || true
           done
 
           BUILD_DIR="${WORKSPACE}/.cache/mpv/build/${PLATFORM}/${ARCH}"
           for ext in "${EXTENSIONS[@]}"; do
-            find "${BUILD_DIR}" -name "*.${ext}" -exec cp {} "${OUTPUT_DIR}/" \; 2>/dev/null || true
+            find "${BUILD_DIR}" -name "*.${ext}" -exec cp -P {} "${OUTPUT_DIR}/" \; 2>/dev/null || true
           done
 
           echo "Collected libraries:"
