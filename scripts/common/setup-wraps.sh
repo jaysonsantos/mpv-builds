@@ -25,3 +25,7 @@ echo "Downloading subprojects..."
 meson subprojects download || true
 
 echo "Wraps configured"
+
+# Fix for newer python versions
+sed -i'.bkp' 's/ET.parse(xmlfile))$/ET.parse(xmlfile).getroot())/' \
+    subprojects/libplacebo/src/vulkan/utils_gen.py || true
