@@ -4,24 +4,24 @@ on:
   push:
     branches: [main, master]
     paths:
-      - '.github/workflows/macos.yml'
-      - '.github/workflows/build-common.yml'
-      - 'scripts/macos/**'
-      - 'scripts/ios/**'
-      - 'scripts/common/**'
-      - 'patches/macos/**'
-      - 'patches/macios/**'
-      - 'wraps/**'
+      - ".github/workflows/macos.yml"
+      - ".github/workflows/build-common.yml"
+      - "scripts/macos/**"
+      - "scripts/ios/**"
+      - "scripts/common/**"
+      - "patches/macos/**"
+      - "patches/macios/**"
+      - "wraps/**"
   pull_request:
     branches: [main, master]
     paths:
-      - '.github/workflows/macos.yml'
-      - '.github/workflows/build-common.yml'
-      - 'scripts/macos/**'
-      - 'scripts/ios/**'
-      - 'scripts/common/**'
-      - 'patches/macios/**'
-      - 'wraps/**'
+      - ".github/workflows/macos.yml"
+      - ".github/workflows/build-common.yml"
+      - "scripts/macos/**"
+      - "scripts/ios/**"
+      - "scripts/common/**"
+      - "patches/macios/**"
+      - "wraps/**"
   workflow_dispatch:
 
 env:
@@ -33,7 +33,7 @@ jobs:
     with:
       platform: macos
       arch: aarch64
-      runner_os: macos-latest
+      runner_os: macos-26
       library_type: shared
       artifact_name: macos-aarch64
       build_name: macOS aarch64
@@ -43,7 +43,7 @@ jobs:
     with:
       platform: ios
       arch: aarch64
-      runner_os: macos-latest
+      runner_os: macos-26
       library_type: static
       artifact_name: ios-aarch64
       build_name: iOS aarch64
