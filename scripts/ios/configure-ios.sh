@@ -15,7 +15,9 @@ meson setup "build/ios/${ARCH}" \
   -Dcplayer=false \
   -Dtests=false \
   -Dswift-flags='-target arm64-apple-ios' \
-  -Dcocoa=disabled\
+  -Dcocoa=disabled \
+  -Dios-gl=disabled \
+  -Davfoundation=disabled \
   -Dgpl=true \
   -Dmoltenvk=enabled \
   -Dshaderc=disabled \
