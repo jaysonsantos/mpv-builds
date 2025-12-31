@@ -24,7 +24,8 @@ meson setup "build/macos/${ARCH}" \
   -DFFmpeg:gpl=enabled \
   -DFFmpeg:version3=enabled \
   -DFFmpeg:tls_protocol=enabled \
+  -DFFmpeg:tests=disabled \
+  -Dswift-flags='-target arm64-apple-macosx10.15' \
   --prefix="$(pwd)/../prefix/macos/${ARCH}"
 
 echo "macOS build configured for ${ARCH}"
-

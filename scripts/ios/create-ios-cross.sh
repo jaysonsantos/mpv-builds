@@ -13,40 +13,9 @@ fi
 
 SDK_PLATFORM_PATH="$(xcrun -v -sdk iphoneos --show-sdk-platform-path)"
 SYS_ROOT="${SDK_PLATFORM_PATH}/Developer/SDKs/iPhoneOS.sdk"
-RELATIVE_PATH="$(python3 -c "root='${SYS_ROOT}'; print('../' * root.count('/'))")"
 
-# Create pkgconfig directory for iOS (this will be the ONLY place pkg-config searches)
-mkdir -p "${PROJECT_ROOT}/.cache/ios-pkgconfig"
-
-# Create a vulkan.pc that points to libplacebo's bundled Vulkan headers
-# Note: For iOS, MoltenVK provides the Vulkan implementation at runtime
-# We only need the headers for compilation
-# Use absolute path directly in Cflags to avoid sysroot path mangling
-# TODO: sys_root will append to this path which will then be wrong, this is just a hack to make it work
-
-VULKAN_HEADERS_DIR="/${RELATIVE_PATH}${PROJECT_ROOT}/.cache/mpv/subprojects/libplacebo/3rdparty/Vulkan-Headers/include"
-
-cat > "${PROJECT_ROOT}/.cache/ios-pkgconfig/vulkan.pc" << EOF
-Name: Vulkan-Headers
-Description: Vulkan Headers for iOS (headers only, MoltenVK provides implementation)
-Version: 1.3.283
-Cflags: -DVK_USE_PLATFORM_METAL_EXT -isystem ${VULKAN_HEADERS_DIR}
-EOF
-
-echo "Created vulkan.pc at ${PROJECT_ROOT}/.cache/ios-pkgconfig/vulkan.pc"
-
-# Create a pkg-config wrapper that ONLY searches our iOS pkgconfig directory
-# This prevents finding host system libraries like lcms2 from homebrew
-cat > "${PROJECT_ROOT}/.cache/ios-pkgconfig/pkg-config-ios" << 'WRAPPER'
-#!/bin/bash
-# iOS pkg-config wrapper - only searches iOS-specific pkgconfig directory
-export PKG_CONFIG_PATH=""
-export PKG_CONFIG_LIBDIR="$(dirname "$0")"
-exec pkg-config "$@"
-WRAPPER
-chmod +x "${PROJECT_ROOT}/.cache/ios-pkgconfig/pkg-config-ios"
-
-echo "Created pkg-config wrapper at ${PROJECT_ROOT}/.cache/ios-pkgconfig/pkg-config-ios"
+# Setup iOS-specific pkgconfig directory with vulkan.pc
+"${PROJECT_ROOT}/scripts/common/setup-macios-pkgconfig.sh" ios "${SYS_ROOT}"
 
 # Create iOS cross file
 cat > ios-cross.txt << EOF
@@ -69,7 +38,6 @@ cpp_link_args = ['-miphoneos-version-min=11.0']
 objc_args = ['-miphoneos-version-min=11.0']
 objcpp_args = ['-miphoneos-version-min=11.0']
 
-
 [properties]
 sys_root = '${SYS_ROOT}'
 needs_exe_wrapper = true
@@ -83,6 +51,9 @@ endian = 'little'
 
 [cmake]
 CMAKE_POSITION_INDEPENDENT_CODE='ON'
+CMAKE_C_FLAGS='-miphoneos-version-min=14.0 -miphonesimulator-version-min=14.0'
+CMAKE_CXX_FLAGS='-miphoneos-version-min=14.0 -miphonesimulator-version-min=14.0'
+CMAKE_SYSTEM_NAME = 'iOS'
 EOF
 
 echo "Created ios-cross.txt"

@@ -20,7 +20,7 @@ meson setup "build/ios/${ARCH}" \
   -Davfoundation=disabled \
   -Dgpl=true \
   -Dmoltenvk=enabled \
-  -Dshaderc=disabled \
+  -Dshaderc=enabled \
   -Dharfbuzz:icu=disabled \
   -Dlibass:require-system-font-provider=false \
   -Dlibplacebo:lcms=disabled \
