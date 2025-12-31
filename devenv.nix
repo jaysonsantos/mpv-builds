@@ -19,7 +19,7 @@
     pkgs.cmake
     pkgs.sccache
     pkgs.python3
-    pkgs.vulkan-headers
+    # pkgs.vulkan-headers
     pkgs.moltenvk
     pkgs.binutils
   ];

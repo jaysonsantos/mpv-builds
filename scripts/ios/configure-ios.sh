@@ -5,6 +5,7 @@ ARCH="${1:-aarch64}"
 
 cd .cache/mpv
 
+  # -Dcoreaudio=disabled \
 meson setup "build/ios/${ARCH}" \
   --default-library=static \
   --buildtype=release \
@@ -13,6 +14,8 @@ meson setup "build/ios/${ARCH}" \
   -Dlibmpv=true \
   -Dcplayer=false \
   -Dtests=false \
+  -Dswift-flags='-target arm64-apple-ios' \
+  -Dcocoa=disabled\
   -Dgpl=true \
   -Dmoltenvk=enabled \
   -Dshaderc=disabled \

@@ -12,6 +12,8 @@ else
 fi
 
 SDK_PLATFORM_PATH="$(xcrun -v -sdk iphoneos --show-sdk-platform-path)"
+SYS_ROOT="${SDK_PLATFORM_PATH}/Developer/SDKs/iPhoneOS.sdk"
+RELATIVE_PATH="$(python3 -c "root='${SYS_ROOT}'; print('../' * root.count('/'))")"
 
 # Create pkgconfig directory for iOS (this will be the ONLY place pkg-config searches)
 mkdir -p "${PROJECT_ROOT}/.cache/ios-pkgconfig"
@@ -20,13 +22,15 @@ mkdir -p "${PROJECT_ROOT}/.cache/ios-pkgconfig"
 # Note: For iOS, MoltenVK provides the Vulkan implementation at runtime
 # We only need the headers for compilation
 # Use absolute path directly in Cflags to avoid sysroot path mangling
-VULKAN_HEADERS_DIR="${PROJECT_ROOT}/.cache/mpv/subprojects/libplacebo/3rdparty/Vulkan-Headers/include"
+# TODO: sys_root will append to this path which will then be wrong, this is just a hack to make it work
+
+VULKAN_HEADERS_DIR="/${RELATIVE_PATH}${PROJECT_ROOT}/.cache/mpv/subprojects/libplacebo/3rdparty/Vulkan-Headers/include"
 
 cat > "${PROJECT_ROOT}/.cache/ios-pkgconfig/vulkan.pc" << EOF
 Name: Vulkan-Headers
 Description: Vulkan Headers for iOS (headers only, MoltenVK provides implementation)
 Version: 1.3.283
-Cflags: -isystem ${VULKAN_HEADERS_DIR}
+Cflags: -DVK_USE_PLATFORM_METAL_EXT -isystem ${VULKAN_HEADERS_DIR}
 EOF
 
 echo "Created vulkan.pc at ${PROJECT_ROOT}/.cache/ios-pkgconfig/vulkan.pc"
@@ -54,17 +58,25 @@ objcpp = ['/usr/bin/xcrun', '-sdk', 'iphoneos', 'sccache', 'clang++']
 ar = ['/usr/bin/xcrun', '-sdk', 'iphoneos', 'ar']
 strip = ['/usr/bin/xcrun', '-sdk', 'iphoneos', 'strip']
 ranlib = ['/usr/bin/xcrun', '-sdk', 'iphoneos', 'ranlib']
-pkgconfig = '${PROJECT_ROOT}/.cache/ios-pkgconfig/pkg-config-ios'
+pkg-config = '${PROJECT_ROOT}/.cache/ios-pkgconfig/pkg-config-ios'
 
 [built-in options]
 pkg_config_path = '${PROJECT_ROOT}/.cache/ios-pkgconfig'
+c_args = ['-miphoneos-version-min=11.0']
+cpp_args = ['-miphoneos-version-min=11.0']
+c_link_args = ['-miphoneos-version-min=11.0']
+cpp_link_args = ['-miphoneos-version-min=11.0']
+objc_args = ['-miphoneos-version-min=11.0']
+objcpp_args = ['-miphoneos-version-min=11.0']
+
 
 [properties]
-sys_root = '${SDK_PLATFORM_PATH}/Developer/SDKs/iPhoneOS.sdk'
+sys_root = '${SYS_ROOT}'
 needs_exe_wrapper = true
 
 [host_machine]
 system = 'darwin'
+subsystem = 'ios'
 cpu_family = 'aarch64'
 cpu = 'arm64'
 endian = 'little'
