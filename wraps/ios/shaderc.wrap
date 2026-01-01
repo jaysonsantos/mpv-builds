@@ -4,7 +4,7 @@ url = https://github.com/google/shaderc.git
 revision = v2025.5
 depth = 1
 method = cmake
-diff_files = shaderc/set-version.patch, shaderc/disable-combined.patch
+diff_files = shaderc/set-version.patch, shaderc/disable-combined.patch, shaderc/fix-glslang-install.patch
 
 [provide]
 shaderc = shaderc_dep
