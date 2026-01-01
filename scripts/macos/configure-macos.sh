@@ -25,6 +25,10 @@ meson setup "build/macos/${ARCH}" \
   -DFFmpeg:version3=enabled \
   -DFFmpeg:tls_protocol=enabled \
   -DFFmpeg:tests=disabled \
+  -DFFmpeg:libxcb=disabled \
+  -DFFmpeg:libxcb_shm=disabled \
+  -DFFmpeg:libxcb_shape=disabled \
+  -DFFmpeg:libxcb_xfixes=disabled \
   -Dswift-flags='-target arm64-apple-macosx10.15' \
   --prefix="$(pwd)/../prefix/macos/${ARCH}"
 

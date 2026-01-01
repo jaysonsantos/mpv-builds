@@ -5,7 +5,7 @@ cd .cache/mpv
 mkdir -p subprojects
 
 # Install basic wraps
-for wrap in expat harfbuzz libpng zlib; do
+for wrap in expat harfbuzz libpng zlib google-brotli; do
   meson wrap install "$wrap" || true
 done
 
