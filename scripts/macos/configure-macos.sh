@@ -17,10 +17,12 @@ meson setup "build/macos/${ARCH}" \
   -Dtests=false \
   -Dgpl=true \
   -Dmoltenvk=enabled \
-  -Dshaderc=disabled \
+  -Dlibplacebo:shaderc=enabled \
   -Dlibplacebo:lcms=enabled \
+  -Dlibplacebo:vk-proc-addr=enabled \
   -Dharfbuzz:icu=disabled \
   -Dlibass:require-system-font-provider=false \
+  -Dfreetype2:brotli=disabled \
   -DFFmpeg:gpl=enabled \
   -DFFmpeg:version3=enabled \
   -DFFmpeg:tls_protocol=enabled \

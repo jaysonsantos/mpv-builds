@@ -21,6 +21,8 @@
     pkgs.python3
     pkgs.vulkan-headers
     pkgs.moltenvk
+    pkgs.vulkan-loader
+    pkgs.shaderc
     pkgs.binutils
   ];
 
@@ -51,6 +53,7 @@
     git --version # Use packages
 
     echo ${pkgs.vulkan-headers}
+    echo ${pkgs.vulkan-loader}
   '';
 
   # https://devenv.sh/tasks/

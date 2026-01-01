@@ -22,7 +22,6 @@ on:
         required: true
         type: string
 
-
 jobs:
   build:
     name: ${{ inputs.build_name }}
@@ -86,7 +85,7 @@ jobs:
       - name: Install Dependencies (macOS)
         if: runner.os == 'macOS'
         run: |
-          brew install ninja nasm pkg-config molten-vk vulkan-headers vulkan-loader
+          brew install nasm molten-vk vulkan-headers vulkan-loader
           pip install meson
 
       - name: Setup Android NDK
