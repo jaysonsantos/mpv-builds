@@ -86,7 +86,7 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           brew install nasm molten-vk vulkan-headers vulkan-loader
-          pip install meson
+          pip install meson==1.9.2
 
       - name: Setup Android NDK
         if: inputs.platform == 'android'
