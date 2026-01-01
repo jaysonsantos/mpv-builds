@@ -54,6 +54,8 @@ CMAKE_POSITION_INDEPENDENT_CODE='ON'
 CMAKE_C_FLAGS='-miphoneos-version-min=14.0 -miphonesimulator-version-min=14.0'
 CMAKE_CXX_FLAGS='-miphoneos-version-min=14.0 -miphonesimulator-version-min=14.0'
 CMAKE_SYSTEM_NAME = 'iOS'
+# Force static libraries only - avoids Meson CMake soversion issues
+BUILD_SHARED_LIBS = 'OFF'
 # Shaderc options - skip tests/examples/install to avoid gmock dependency
 SHADERC_SKIP_TESTS = 'ON'
 SHADERC_SKIP_EXAMPLES = 'ON'
