@@ -22,9 +22,9 @@ meson setup "build/ios/${ARCH}" \
   -Davfoundation=disabled \
   -Dgpl=true \
   -Dmoltenvk=enabled \
-  -Dshaderc=enabled \
   -Dharfbuzz:icu=disabled \
   -Dlibass:require-system-font-provider=false \
+  -Dlibplacebo:shaderc=enabled \
   -Dlibplacebo:lcms=disabled \
   -DFFmpeg:gpl=enabled \
   -DFFmpeg:version3=enabled \
