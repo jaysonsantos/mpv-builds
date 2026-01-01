@@ -33,7 +33,6 @@ meson setup "build/ios/${ARCH}" \
   -Dlibass:require-system-font-provider=false \
   -Dlibplacebo:shaderc=enabled \
   -Dlibplacebo:lcms=disabled \
-  -Dshaderc:cmake_options='-DSHADERC_SKIP_TESTS=ON -DSHADERC_SKIP_EXAMPLES=ON -DSHADERC_SKIP_INSTALL=ON' \
   -DFFmpeg:gpl=enabled \
   -DFFmpeg:version3=enabled \
   -DFFmpeg:mbedtls=enabled \

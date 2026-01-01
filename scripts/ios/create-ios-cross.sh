@@ -54,6 +54,10 @@ CMAKE_POSITION_INDEPENDENT_CODE='ON'
 CMAKE_C_FLAGS='-miphoneos-version-min=14.0 -miphonesimulator-version-min=14.0'
 CMAKE_CXX_FLAGS='-miphoneos-version-min=14.0 -miphonesimulator-version-min=14.0'
 CMAKE_SYSTEM_NAME = 'iOS'
+SHADERC_SKIP_TESTS = 'ON'
+SHADERC_SKIP_EXAMPLES = 'ON'
+SHADERC_SKIP_INSTALL = 'ON'
+SHADERC_SKIP_COPYRIGHT_CHECK = 'ON'
 EOF
 
 echo "Created ios-cross.txt"
