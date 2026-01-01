@@ -5,6 +5,8 @@ ARCH="${1:-aarch64}"
 
 cd .cache/mpv
 
+grep moltenvk meson.build || (cd ../../ && ./scripts/common/apply-macos-patch.sh)
+
   # -Dcoreaudio=disabled \
 meson setup "build/ios/${ARCH}" \
   --default-library=static \
