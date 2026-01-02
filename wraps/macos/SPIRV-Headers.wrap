@@ -1,0 +1,9 @@
+[wrap-git]
+directory = SPIRV-Headers
+url = https://github.com/KhronosGroup/SPIRV-Headers.git
+revision = 2a611a970fdbc41ac2e3e328802aed9985352dca
+depth = 1
+method = cmake
+
+[provide]
+SPIRV-Headers = spirv_headers_dep

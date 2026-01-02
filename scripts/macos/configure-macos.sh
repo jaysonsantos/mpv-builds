@@ -3,6 +3,13 @@ set -ex
 
 ARCH="${1:-aarch64}"
 
+# Setup shaderc for macOS (must run before cd to .cache/mpv)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+if [ -f "${SCRIPT_DIR}/setup-shaderc.sh" ]; then
+  echo "Setting up shaderc for macOS..."
+  "${SCRIPT_DIR}/setup-shaderc.sh"
+fi
+
 cd .cache/mpv
 
 grep moltenvk meson.build || (cd ../../ && ./scripts/common/apply-macos-patch.sh)
