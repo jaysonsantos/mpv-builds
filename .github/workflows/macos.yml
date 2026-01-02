@@ -24,11 +24,10 @@ on:
       - "wraps/**"
   workflow_dispatch:
 
-env:
-  MPV_VERSION: "0.41.0"
-
 jobs:
   build-macos:
+    permissions:
+      contents: write
     uses: ./.github/workflows/build-common.yml
     with:
       platform: macos
@@ -39,6 +38,8 @@ jobs:
       build_name: macOS aarch64
 
   build-ios:
+    permissions:
+      contents: write
     uses: ./.github/workflows/build-common.yml
     with:
       platform: ios
@@ -47,89 +48,3 @@ jobs:
       library_type: static
       artifact_name: ios-aarch64
       build_name: iOS aarch64
-
-  create-macos-release:
-    name: Create macOS Release
-    needs: [build-macos]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Download macOS Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: macos-aarch64
-          path: artifacts/macos-aarch64
-
-      - name: Create Archive for macOS
-        run: |
-          cd artifacts
-          tar -czf "macos-aarch64-mpv-${{ env.MPV_VERSION }}.tar.gz" -C "macos-aarch64" .
-          ls -lh *.tar.gz
-
-      - name: Delete Existing macOS Release Tag
-        run: |
-          TAG="macos-aarch64-mpv-${{ env.MPV_VERSION }}"
-          gh release delete "${TAG}" --yes || true
-          git push origin --delete "refs/tags/${TAG}" || true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Release for macOS
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: macos-aarch64-mpv-${{ env.MPV_VERSION }}
-          name: macOS aarch64 - mpv ${{ env.MPV_VERSION }}
-          draft: false
-          prerelease: false
-          files: |
-            artifacts/macos-aarch64-mpv-${{ env.MPV_VERSION }}.tar.gz
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-  create-ios-release:
-    name: Create iOS Release
-    needs: [build-ios]
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Download iOS Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: ios-aarch64
-          path: artifacts/ios-aarch64
-
-      - name: Create Archive for iOS
-        run: |
-          cd artifacts
-          tar -czf "ios-aarch64-mpv-${{ env.MPV_VERSION }}.tar.gz" -C "ios-aarch64" .
-          ls -lh *.tar.gz
-
-      - name: Delete Existing iOS Release Tag
-        run: |
-          TAG="ios-aarch64-mpv-${{ env.MPV_VERSION }}"
-          gh release delete "${TAG}" --yes || true
-          git push origin --delete "refs/tags/${TAG}" || true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Release for iOS
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ios-aarch64-mpv-${{ env.MPV_VERSION }}
-          name: iOS aarch64 - mpv ${{ env.MPV_VERSION }}
-          draft: false
-          prerelease: false
-          files: |
-            artifacts/ios-aarch64-mpv-${{ env.MPV_VERSION }}.tar.gz
-          token: ${{ secrets.GITHUB_TOKEN }}

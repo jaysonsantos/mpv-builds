@@ -26,10 +26,13 @@ jobs:
   build:
     name: ${{ inputs.build_name }}
     runs-on: ${{ inputs.runner_os }}
+    permissions:
+      contents: write
     env:
       CACHE_ROOT: ${{ github.workspace }}/.cache
       # sccache disk cache configuration
       SCCACHE_DIR: ${{ github.workspace }}/.cache/sccache
+      MPV_VERSION: "0.41.0"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -220,12 +223,13 @@ jobs:
 
           echo "Collected libraries:"
           ls -lh "${OUTPUT_DIR}/"
+          tar -czvf "${OUTPUT_DIR}.tar.gz" -C "${WORKSPACE}/collected-libs" "${PLATFORM}-${ARCH}"
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: ${{ inputs.artifact_name }}
-          path: collected-libs/${{ inputs.platform }}-${{ inputs.arch }}/
+          path: collected-libs/${{ inputs.platform }}-${{ inputs.arch }}.tar.gz
           if-no-files-found: error
 
       - name: sccache stats
@@ -242,3 +246,24 @@ jobs:
             ${{ github.workspace }}/.cache/mpv
           retention-days: 3
           include-hidden-files: true
+
+      - name: Delete Existing Release Tag
+        if: github.ref == 'refs/heads/main'
+        run: |
+          TAG="${{ inputs.platform }}-${{ inputs.arch }}-mpv-${{ env.MPV_VERSION }}"
+          gh release delete "${TAG}" --yes || true
+          git push origin --delete "refs/tags/${TAG}" || true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create Release for x86_64
+        if: github.ref == 'refs/heads/main'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.platform }}-${{ inputs.arch }}-mpv-${{ env.MPV_VERSION }}
+          name: ${{ inputs.platform }}-${{ inputs.arch }}
+          draft: false
+          prerelease: false
+          files: |
+            collected-libs/${{ inputs.platform }}-${{ inputs.arch }}.tar.gz
+          token: ${{ secrets.GITHUB_TOKEN }}

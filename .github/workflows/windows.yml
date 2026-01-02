@@ -21,11 +21,10 @@ on:
       - "wraps/**"
   workflow_dispatch:
 
-env:
-  MPV_VERSION: "0.41.0"
-
 jobs:
   build-x86_64:
+    permissions:
+      contents: write
     uses: ./.github/workflows/build-common.yml
     with:
       platform: windows
@@ -34,49 +33,3 @@ jobs:
       library_type: shared
       artifact_name: windows-x86_64
       build_name: Windows x86_64
-
-  create-release:
-    name: Create Release
-    needs: build-x86_64
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
-    permissions:
-      contents: write
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Download All Artifacts
-        uses: actions/download-artifact@v4
-        with:
-          path: artifacts
-
-      - name: Create Archive for Each Platform
-        run: |
-          cd artifacts
-          for dir in */; do
-            dirname=${dir%/}
-            # Rename to include mpv version: windows-x86_64 -> windows-x86_64-mpv-0.41.0
-            tar -czf "${dirname}-mpv-${{ env.MPV_VERSION }}.tar.gz" -C "${dirname}" .
-          done
-          ls -lh *.tar.gz
-
-      - name: Delete Existing Release Tag
-        run: |
-          TAG="windows-x86_64-mpv-${{ env.MPV_VERSION }}"
-          gh release delete "${TAG}" --yes || true
-          git push origin --delete "refs/tags/${TAG}" || true
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Release for x86_64
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: windows-x86_64-mpv-${{ env.MPV_VERSION }}
-          name: Windows x86_64 - mpv ${{ env.MPV_VERSION }}
-          draft: false
-          prerelease: false
-          files: |
-            artifacts/windows-x86_64-mpv-${{ env.MPV_VERSION }}.tar.gz
-          token: ${{ secrets.GITHUB_TOKEN }}
