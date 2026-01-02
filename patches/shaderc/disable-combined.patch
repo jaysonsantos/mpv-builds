@@ -1,0 +1,40 @@
+diff --git a/libshaderc/CMakeLists.txt b/libshaderc/CMakeLists.txt
+--- a/libshaderc/CMakeLists.txt
++++ b/libshaderc/CMakeLists.txt
+@@ -94,21 +94,21 @@
+     shaderc_cpp
+     shaderc_private)
+ 
+-shaderc_combine_static_lib(shaderc_combined shaderc)
+-
+-if(SHADERC_ENABLE_INSTALL)
+-  install(TARGETS shaderc_combined DESTINATION ${CMAKE_INSTALL_LIBDIR})
+-endif(SHADERC_ENABLE_INSTALL)
+-
+-shaderc_add_tests(
+-  TEST_PREFIX shaderc_combined
+-  LINK_LIBS shaderc_combined ${CMAKE_THREAD_LIBS_INIT}
+-  INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc_util/include ${glslang_SOURCE_DIR}
+-               ${spirv-tools_SOURCE_DIR}/include
+-               ${SPIRV-Headers_SOURCE_DIR}/include
+-  TEST_NAMES
+-    shaderc
+-    shaderc_cpp)
++# shaderc_combine_static_lib(shaderc_combined shaderc)
++# 
++# if(SHADERC_ENABLE_INSTALL)
++#   install(TARGETS shaderc_combined DESTINATION ${CMAKE_INSTALL_LIBDIR})
++# endif(SHADERC_ENABLE_INSTALL)
++# 
++# shaderc_add_tests(
++#   TEST_PREFIX shaderc_combined
++#   LINK_LIBS shaderc_combined ${CMAKE_THREAD_LIBS_INIT}
++#   INCLUDE_DIRS include ${shaderc_SOURCE_DIR}/libshaderc_util/include ${glslang_SOURCE_DIR}
++#                ${spirv-tools_SOURCE_DIR}/include
++#                ${SPIRV-Headers_SOURCE_DIR}/include
++#   TEST_NAMES
++#     shaderc
++#     shaderc_cpp)
+ 
+ if(${SHADERC_ENABLE_TESTS})
+   add_executable(shaderc_c_smoke_test ./src/shaderc_c_smoke_test.c)

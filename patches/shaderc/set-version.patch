@@ -1,0 +1,12 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -14,7 +14,7 @@
+ 
+ cmake_minimum_required(VERSION 3.22.1)
+ 
+-project(shaderc)
++project(shaderc VERSION 2025.5)
+ enable_testing()
+ 
+ if ("${CMAKE_BUILD_TYPE}" STREQUAL "")

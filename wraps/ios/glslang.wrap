@@ -1,0 +1,9 @@
+[wrap-git]
+directory = glslang
+url = https://github.com/KhronosGroup/glslang.git
+revision = efd24d75bcbc55620e759f6bf42c45a32abac5f8
+depth = 1
+method = cmake
+
+[provide]
+glslang = glslang_dep

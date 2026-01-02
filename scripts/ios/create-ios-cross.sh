@@ -54,6 +54,20 @@ CMAKE_POSITION_INDEPENDENT_CODE='ON'
 CMAKE_C_FLAGS='-miphoneos-version-min=14.0 -miphonesimulator-version-min=14.0'
 CMAKE_CXX_FLAGS='-miphoneos-version-min=14.0 -miphonesimulator-version-min=14.0'
 CMAKE_SYSTEM_NAME = 'iOS'
+# Force static libraries only - avoids Meson CMake soversion issues
+BUILD_SHARED_LIBS = 'OFF'
+# Shaderc options - skip tests/examples/install to avoid gmock dependency
+SHADERC_SKIP_TESTS = 'ON'
+SHADERC_SKIP_EXAMPLES = 'ON'
+SHADERC_SKIP_INSTALL = 'ON'
+SHADERC_SKIP_COPYRIGHT_CHECK = 'ON'
+# glslang options - disable install to avoid export errors
+GLSLANG_ENABLE_INSTALL = 'OFF'
+GLSLANG_TESTS = 'OFF'
+ENABLE_GLSLANG_BINARIES = 'OFF'
+# SPIRV-Tools options - disable install
+SKIP_SPIRV_TOOLS_INSTALL = 'ON'
+SPIRV_SKIP_TESTS = 'ON'
 EOF
 
 echo "Created ios-cross.txt"
