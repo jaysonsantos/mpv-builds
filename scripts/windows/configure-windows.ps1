@@ -78,10 +78,15 @@ foreach ($wrap in $gstreamerWraps) {
     curl.exe -Lsqo "subprojects/${wrap}.wrap" "${GStreamerWrapsUrl}/${wrap}.wrap"
 }
 
-$copyWraps = @("lcms2", "fribidi")
+$copyWraps = @("lcms2", "fribidi", "uchardet")
 foreach ($wrap in $copyWraps) {
     Copy-Item "../../wraps/${wrap}.wrap" "subprojects/"
 }
+
+# Copy uchardet patches
+Write-Host "Setting up uchardet patches..."
+New-Item -ItemType Directory -Force -Path "subprojects/packagefiles/uchardet" | Out-Null
+Copy-Item "../../patches/uchardet/*.patch" "subprojects/packagefiles/uchardet/"
 
 # Run mpv's build script
 Write-Host "Running mpv build script for Windows $Arch..."

@@ -1,0 +1,27 @@
+diff --git a/src/meson.build b/src/meson.build
+--- a/src/meson.build
++++ b/src/meson.build
+@@ -51,6 +51,14 @@ uchardet_sources = files(
+     'uchardet.cpp',
+ )
+ 
++# Add Windows DLL export macros when building shared library
++cxx = meson.get_compiler('cpp')
++if get_option('default_library') != 'static' and (host_machine.system() == 'windows' or host_machine.system() == 'cygwin')
++    uchardet_dll_args = ['-DUCHARDET_SHARED', '-DBUILDING_UCHARDET']
++else
++    uchardet_dll_args = []
++endif
++
+ uchardet_args = [
+     '-DVERSION="@0@"'.format(meson.project_version()),
+ ]
+@@ -58,7 +66,7 @@ uchardet_args = [
+ uchardet = library(
+     'uchardet',
+     uchardet_sources,
+-    cpp_args: base_cpp_args + uchardet_args,
++    cpp_args: base_cpp_args + uchardet_args + uchardet_dll_args,
+ )
+ 
+ uchardet_dep = declare_dependency(
