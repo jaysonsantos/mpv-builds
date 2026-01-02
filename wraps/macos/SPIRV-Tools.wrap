@@ -1,0 +1,9 @@
+[wrap-git]
+directory = SPIRV-Tools
+url = https://github.com/KhronosGroup/SPIRV-Tools.git
+revision = v2025.3.rc1
+depth = 1
+method = cmake
+
+[provide]
+SPIRV-Tools = spirv_tools_dep
