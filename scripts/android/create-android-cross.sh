@@ -14,14 +14,20 @@ if [ "$ARCH" == "aarch64" ]; then
   ANDROID_ABI="aarch64-linux-android21"
   CPU_FAMILY="aarch64"
   CPU="aarch64"
+  CMAKE_SYSTEM_PROCESSOR="aarch64"
+  CMAKE_ANDROID_ARCH_ABI="arm64-v8a"
 elif [ "$ARCH" == "x86_64" ]; then
   ANDROID_ABI="x86_64-linux-android21"
   CPU_FAMILY="x86_64"
   CPU="x86_64"
+  CMAKE_SYSTEM_PROCESSOR="x86_64"
+  CMAKE_ANDROID_ARCH_ABI="x86_64"
 elif [ "$ARCH" == "armv7a" ]; then
   ANDROID_ABI="armv7a-linux-androideabi21"
   CPU_FAMILY="arm"
   CPU="armv7a"
+  CMAKE_SYSTEM_PROCESSOR="armv7-a"
+  CMAKE_ANDROID_ARCH_ABI="armeabi-v7a"
 else
   echo "Unsupported architecture: $ARCH"
   echo "Usage: $0 [aarch64|x86_64|armv7a]"
@@ -52,6 +58,8 @@ cpp_link_args = ['${PAGE_SIZE_FLAGS}']
 
 [cmake]
 CMAKE_POSITION_INDEPENDENT_CODE='ON'
+CMAKE_SYSTEM_PROCESSOR='${CMAKE_SYSTEM_PROCESSOR}'
+CMAKE_ANDROID_ARCH_ABI='${CMAKE_ANDROID_ARCH_ABI}'
 EOF
 
 echo "Created android-${ARCH}-cross.txt"
