@@ -43,6 +43,9 @@ echo "::endgroup::"
 ASM_FLAGS=""
 if [ "$ARCH" == "x86_64" ]; then
   ASM_FLAGS="-Dlibass:asm=disabled -DFFmpeg:x86asm=disabled"
+elif [ "$ARCH" == "armv7a" ]; then
+  # armv7a supports ASM, no flags needed
+  ASM_FLAGS=""
 fi
 
 # Configure meson build

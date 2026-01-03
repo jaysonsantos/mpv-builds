@@ -89,6 +89,9 @@ if echo "${CPP_COMPILER}" | grep -q "aarch64"; then
 elif echo "${CPP_COMPILER}" | grep -q "x86_64"; then
     ARCH_DIR="x86_64-linux-android"
     echo "Detected architecture from compiler path: x86_64"
+elif echo "${CPP_COMPILER}" | grep -q "armv7a"; then
+    ARCH_DIR="arm-linux-androideabi"
+    echo "Detected architecture from compiler path: armv7a (ARM)"
 else
     echo "::warning::Could not detect architecture from compiler path"
     # Fallback based on input argument
@@ -98,6 +101,9 @@ else
     elif [ "${ARCH}" == "x86_64" ]; then
         ARCH_DIR="x86_64-linux-android"
         echo "Using fallback architecture from argument: x86_64"
+    elif [ "${ARCH}" == "armv7a" ]; then
+        ARCH_DIR="arm-linux-androideabi"
+        echo "Using fallback architecture from argument: armv7a"
     fi
 fi
 echo "NDK architecture directory: ${ARCH_DIR}"
