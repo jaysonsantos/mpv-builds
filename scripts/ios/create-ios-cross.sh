@@ -31,12 +31,13 @@ pkg-config = '${PROJECT_ROOT}/.cache/ios-pkgconfig/pkg-config-ios'
 
 [built-in options]
 pkg_config_path = '${PROJECT_ROOT}/.cache/ios-pkgconfig'
-c_args = ['-miphoneos-version-min=11.0']
-cpp_args = ['-miphoneos-version-min=11.0']
-c_link_args = ['-miphoneos-version-min=11.0']
-cpp_link_args = ['-miphoneos-version-min=11.0']
-objc_args = ['-miphoneos-version-min=11.0']
-objcpp_args = ['-miphoneos-version-min=11.0']
+c_args = ['-miphoneos-version-min=14.0', '-miphonesimulator-version-min=14.0']
+cpp_args = ['-miphoneos-version-min=14.0', '-miphonesimulator-version-min=14.0']
+c_link_args = ['-miphoneos-version-min=14.0', '-miphonesimulator-version-min=14.0']
+cpp_link_args = ['-miphoneos-version-min=14.0', '-miphonesimulator-version-min=14.0']
+objc_args = ['-miphoneos-version-min=14.0', '-miphonesimulator-version-min=14.0']
+objcpp_args = ['-miphoneos-version-min=14.0', '-miphonesimulator-version-min=14.0']
+
 
 [properties]
 sys_root = '${SYS_ROOT}'
@@ -45,6 +46,7 @@ needs_exe_wrapper = true
 [host_machine]
 system = 'darwin'
 subsystem = 'ios'
+kernel = 'xnu'
 cpu_family = 'aarch64'
 cpu = 'arm64'
 endian = 'little'
@@ -68,6 +70,7 @@ ENABLE_GLSLANG_BINARIES = 'OFF'
 # SPIRV-Tools options - disable install
 SKIP_SPIRV_TOOLS_INSTALL = 'ON'
 SPIRV_SKIP_TESTS = 'ON'
+SPIRV_SKIP_EXECUTABLES = 'ON'
 EOF
 
 echo "Created ios-cross.txt"
