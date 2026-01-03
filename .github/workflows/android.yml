@@ -45,3 +45,15 @@ jobs:
       library_type: both
       artifact_name: android-aarch64
       build_name: Android aarch64
+
+  build-armv7a:
+    permissions:
+      contents: write
+    uses: ./.github/workflows/build-common.yml
+    with:
+      platform: android
+      arch: armv7a
+      runner_os: ubuntu-latest
+      library_type: both
+      artifact_name: android-armv7a
+      build_name: Android armeabi-v7a

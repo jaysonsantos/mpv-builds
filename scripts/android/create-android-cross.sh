@@ -18,9 +18,13 @@ elif [ "$ARCH" == "x86_64" ]; then
   ANDROID_ABI="x86_64-linux-android21"
   CPU_FAMILY="x86_64"
   CPU="x86_64"
+elif [ "$ARCH" == "armv7a" ]; then
+  ANDROID_ABI="armv7a-linux-androideabi21"
+  CPU_FAMILY="arm"
+  CPU="armv7a"
 else
   echo "Unsupported architecture: $ARCH"
-  echo "Usage: $0 [aarch64|x86_64]"
+  echo "Usage: $0 [aarch64|x86_64|armv7a]"
   exit 1
 fi
 
