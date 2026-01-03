@@ -253,6 +253,7 @@ jobs:
 
       - name: Delete Existing Release Tag
         if: github.ref == 'refs/heads/main'
+        shell: bash
         run: |
           TAG="${{ inputs.platform }}-${{ inputs.arch }}-mpv-${{ env.MPV_VERSION }}"
           gh release delete "${TAG}" --yes || true
