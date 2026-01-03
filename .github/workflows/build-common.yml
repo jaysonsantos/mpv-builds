@@ -223,7 +223,11 @@ jobs:
 
           echo "Collected libraries:"
           ls -lh "${OUTPUT_DIR}/"
-          tar --force-local -czvf "${OUTPUT_DIR}.tar.gz" -C "${WORKSPACE}/collected-libs" "${PLATFORM}-${ARCH}"
+          if [ "$PLATFORM" == "windows" ]; then
+            tar --force-local -czvf "${OUTPUT_DIR}.tar.gz" -C "${WORKSPACE}/collected-libs" "${PLATFORM}-${ARCH}"
+          else
+            tar -czvf "${OUTPUT_DIR}.tar.gz" -C "${WORKSPACE}/collected-libs" "${PLATFORM}-${ARCH}"
+          fi
 
       - name: Upload Artifacts
         uses: actions/upload-artifact@v4
